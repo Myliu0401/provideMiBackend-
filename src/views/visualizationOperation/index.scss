@@ -1,0 +1,91 @@
+.visualizationOperation {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0px;
+    left: 0px;
+    display: flex;
+    flex-direction: column;
+
+    .visualizationOperation_topArea {
+        width: 100%;
+        height: 40px;
+        background-color: black;
+        padding: 0px 3%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        .left {
+            .text {
+                color: #fff;
+            }
+        }
+
+        .center {}
+
+        .right {
+            display: flex;
+            align-items: center;
+
+            .item {
+                position: relative;
+
+                .text {
+                    color: #a5a5a5;
+                    cursor: pointer;
+                    transition: all 0.2s;
+
+                    &:not(.active):hover{
+                        color: #fff;
+                    }
+
+                    &.active{
+                        color: #fff;
+                    }
+                }
+            }
+
+            .arrow {
+
+                height: 40px;
+                width: 13px;
+                position: relative;
+                margin-right: 25px;
+
+                div{
+                    content: "";
+                    position: absolute;
+                    width: 15px;
+                    height: 40px;
+                    height: 0;
+                    border-style: solid;
+                    right: -14px;
+                    top: 0;
+                    border-width: 20px 0 20px 14px; 
+
+                }
+
+                .a {
+                    border-color: transparent transparent transparent #E7E7EB;
+                    z-index: 1;
+                }
+
+                .b {
+                    
+                    position: absolute;
+                    top: 0px;
+                    border-color: transparent transparent transparent #fff;
+                    z-index: 2;
+                    right: -12px;
+                }
+            }
+
+        }
+    }
+
+
+    .visualizationOperation_main{
+         flex-grow: 1;
+    }
+}

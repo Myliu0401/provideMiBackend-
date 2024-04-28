@@ -1,0 +1,23 @@
+
+
+.projectList{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0px;
+    left: 0px;
+    padding: 0px  3vw;
+
+
+    .projectList_selectionArea{
+        width: 100%;
+        margin: 20px 0px;
+        display: flex;
+        justify-content: space-between;
+    }
+
+
+    .projectList_main{
+
+    }
+}
