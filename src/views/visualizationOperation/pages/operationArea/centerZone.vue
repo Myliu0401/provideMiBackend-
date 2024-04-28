@@ -2,11 +2,11 @@
     <div class="centerZone" @click="deselect">
 
         <div class="content">
-            <div v-for="page in pagesDatas" :key="page.id" class="module" @click.stop="" :style="{ backgroundColor: page.backColor }">
+            <div v-for="page,index in pagesDatas" :key="page.id" class="module" @click.stop="" :style="{ backgroundColor: page.backColor }">
 
                 <div class="backBox">
                     <span class="text">1</span>
-                    <el-color-picker v-model="page.backColor" show-alpha />
+                    <el-color-picker :model-value="page.backColor" show-alpha @active-change="setBackColor(index, $event)"/>
                     <span class="text1">背景</span>
                 </div>
  
@@ -45,13 +45,24 @@ export default {
 
     setup(props, { emit }) {
 
+        const state = reactive({
+            backColor: props
+        });
+
        // 取消选中
        function deselect(){
           mittBus.emit('switchCurrentActive', null); // 触发事件
-       }; 
+       };
+       
+       
+       // 修改背景颜色
+       function setBackColor(index, color){
+         emit('setBackColor', { index, color });
+       }
 
         return {
-            deselect
+            deselect,
+            setBackColor
         }
     }
 }

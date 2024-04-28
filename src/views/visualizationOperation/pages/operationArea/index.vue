@@ -2,7 +2,7 @@
     <div class="operationArea">
         <LeftZone />
         <CenterZone :pagesDatas="state.pagesDatas" @deselect="state.currentActive = null"
-            :activeId="state.currentActive" />
+            :activeId="state.currentActive" @setBackColor="setBackColor"/>
         <RightZone :componentName="componentName" :componentData="componentData" />
     </div>
 </template>
@@ -41,7 +41,6 @@ export default {
                                     marginBottom: 0
                                 }
                             }
-
                         }
                     ],
                 }
@@ -108,6 +107,11 @@ export default {
             }
         };
 
+        // 修改背景颜色
+        function setBackColor(e){
+            state.pagesDatas[e.index].backColor = e.color;
+        };
+
 
         // 获取右侧修改信息的组件名
         const componentName = computed(() => {
@@ -129,7 +133,7 @@ export default {
         });
 
 
-        return { state, componentName, componentData };
+        return { state, componentName, componentData, setBackColor };
     }
 }
 </script>
