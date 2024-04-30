@@ -1,5 +1,6 @@
 <template>
     <div class="original">
+        <svg width="56" height="56" viewBox="0 0 28 28"><defs><linearGradient x1="50%" y1="99.707%" x2="50%" y2="5.583%" id="a"><stop stop-color="#999" offset="0%"></stop><stop stop-color="#737373" offset="100%"></stop></linearGradient></defs><g fill="none" fill-rule="evenodd"><path d="M19.5 6A2.5 2.5 0 0122 8.5v11a2.5 2.5 0 01-2.5 2.5h-11A2.5 2.5 0 016 19.5v-11A2.5 2.5 0 018.5 6h11zm-2.657 8.156a1 1 0 00-1.347.006l-4.22 3.881a.5.5 0 01-.643.03l-2.731-2.087a.25.25 0 00-.402.199V19.5a1 1 0 001 1h11a1 1 0 001-1v-1.82a.5.5 0 00-.165-.371zM11 9.5a1.5 1.5 0 100 3 1.5 1.5 0 000-3z" fill="url(#a)" fill-rule="nonzero"></path><path d="M5.25 1a.75.75 0 010 1.5h-2.5a.75.75 0 010-1.5h2.5zm5 0a.75.75 0 110 1.5h-2.5a.75.75 0 010-1.5h2.5zm5 0a.75.75 0 110 1.5h-2.5a.75.75 0 110-1.5h2.5zm5 0a.75.75 0 110 1.5h-2.5a.75.75 0 110-1.5h2.5zm5 0a.75.75 0 110 1.5h-2.5a.75.75 0 110-1.5h2.5z" fill="#C7C7C7"></path></g></svg>
         <button class="button">上传图片</button>
     </div>
 </template>
@@ -29,6 +30,7 @@ export default {
     justify-content: center;
     position: relative;
     background-color: #f7f7f7;
+    flex-direction: column;
 
     .button {
         outline: none;

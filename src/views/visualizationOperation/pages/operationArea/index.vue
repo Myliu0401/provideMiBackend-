@@ -29,6 +29,10 @@ export default {
                     id: Math.random().toString(36).slice(3), // 数据为唯一id
                     components: [ // 组件数组
                         {
+                            componentName: 'topCarouselComponent',
+                            id: Math.random().toString(36).slice(3)
+                        },
+                        {
                             componentName: 'topImgComponent', // 组件名称
                             id: Math.random().toString(36).slice(3), // 数据为唯一id
                         },

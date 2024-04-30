@@ -25,12 +25,13 @@
 import { reactive, onMounted, onUnmounted, ref } from 'vue';
 import TopImgComponent from '../components/topImgComponent/index.vue';
 import BasisImgComponent from '../components/basisImgComponent/index.vue';
+import TopCarouselComponent from '../components/topCarouselComponent/index.vue';
 import CutSleeveVue from '../components/cutSleeve.vue';
 import mittBus from '/@/utils/mitt'; // 事件总线
 
 export default {
 
-    components: { TopImgComponent, BasisImgComponent, CutSleeveVue },
+    components: { TopImgComponent, BasisImgComponent, TopCarouselComponent, CutSleeveVue },
 
     props: {
         pagesDatas: {
