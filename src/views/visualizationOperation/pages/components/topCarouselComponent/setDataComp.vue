@@ -32,7 +32,7 @@
         <div class="item">
             <p class="title">上传素材</p>
 
-             <CardDragArea />
+             <CardDragArea :listNum="state.currentQuantity" :currentId="componentData.currentId" :carousel="componentData.carousel"/>
         </div>
     </div>
 </template>
@@ -40,11 +40,22 @@
 
 
 <script setup name="topCarouselComponent">
-import { reactive, onMounted, onUnmounted, ref } from 'vue';
+import { reactive, onMounted, onUnmounted, ref, defineProps } from 'vue';
 import CardDragArea from './components/CardDragArea.vue';
 
+const props = defineProps({
+    componentData: {
+        default() {
+            return {
+
+            }
+        }
+    }
+});
+
+
 const state = reactive({
-    currentQuantity: 3
+    currentQuantity: props.componentData.carousel.length
 });
 
 // 切换选中数量

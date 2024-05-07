@@ -30,11 +30,25 @@ export default {
                     components: [ // 组件数组
                         {
                             componentName: 'topCarouselComponent',
-                            id: Math.random().toString(36).slice(3)
+                            id: Math.random().toString(36).slice(3),
+                            data: {
+                                carousel: [{ id: 1 }, { id: 2 }, { id: 3 }],
+                                currentId: null, // 当前选中的id
+                            }
                         },
                         {
                             componentName: 'topImgComponent', // 组件名称
                             id: Math.random().toString(36).slice(3), // 数据为唯一id
+                        },
+                        {
+                            componentName: 'basisTextComponent',
+                            id: Math.random().toString(36).slice(3),
+                            data: {
+                                text: '',
+                                style: {
+                                    
+                                }
+                            }
                         },
                         {
                             componentName: 'basisImgComponent',

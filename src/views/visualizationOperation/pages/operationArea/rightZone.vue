@@ -9,10 +9,11 @@
 import TopImgComponent from '../components/topImgComponent/setDataComp.vue';
 import BasisImgComponent from '../components/basisImgComponent/setDataComp.vue';
 import TopCarouselComponent from '../components/topCarouselComponent/setDataComp.vue';
+import BasisTextComponent from '../components/basisTextComponent/setDataComp.vue';
 
 export default {
 
-    components: { TopImgComponent, BasisImgComponent, TopCarouselComponent },
+    components: { TopImgComponent, BasisImgComponent, TopCarouselComponent, BasisTextComponent },
 
     props: {
 
