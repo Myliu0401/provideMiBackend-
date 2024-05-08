@@ -7,13 +7,16 @@
 
 <script>
 import TopImgComponent from '../components/topImgComponent/setDataComp.vue';
-import BasisImgComponent from '../components/basisImgComponent/setDataComp.vue';
 import TopCarouselComponent from '../components/topCarouselComponent/setDataComp.vue';
+import BasisImgComponent from '../components/basisImgComponent/setDataComp.vue';
+import BasisCarouselComponent from '../components/basisCarouselComponent/setDataComp.vue';
 import BasisTextComponent from '../components/basisTextComponent/setDataComp.vue';
+import ConvJumpLinkComponent from '../components/convJumpLinkComponent/setDataComp.vue';
+
 
 export default {
 
-    components: { TopImgComponent, BasisImgComponent, TopCarouselComponent, BasisTextComponent },
+    components: { TopImgComponent, BasisImgComponent, BasisCarouselComponent, BasisTextComponent, TopCarouselComponent, ConvJumpLinkComponent },
 
     props: {
 

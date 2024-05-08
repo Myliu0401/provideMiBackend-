@@ -1,8 +1,8 @@
 <template>
     <div class="operationArea">
-        <LeftZone />
+        <LeftZone :pagesDatas="state.pagesDatas" />
         <CenterZone :pagesDatas="state.pagesDatas" @deselect="state.currentActive = null"
-            :activeId="state.currentActive" @setBackColor="setBackColor"/>
+            :activeId="state.currentActive" @setBackColor="setBackColor" />
         <RightZone :componentName="componentName" :componentData="componentData" />
     </div>
 </template>
@@ -28,8 +28,17 @@ export default {
                     backColor: '', // 页面的背景颜色
                     id: Math.random().toString(36).slice(3), // 数据为唯一id
                     components: [ // 组件数组
-                        {
+                       /*
+                         {
                             componentName: 'topCarouselComponent',
+                            id: Math.random().toString(36).slice(3),
+                            data: {
+                                carousel: [{ id: 1 }, { id: 2 }, { id: 3 }],
+                                currentId: null, // 当前选中的id
+                            }
+                        },
+                        {
+                            componentName: 'basisCarouselComponent',
                             id: Math.random().toString(36).slice(3),
                             data: {
                                 carousel: [{ id: 1 }, { id: 2 }, { id: 3 }],
@@ -46,7 +55,39 @@ export default {
                             data: {
                                 text: '',
                                 style: {
-                                    
+                                    fontColor: '',
+                                    textAlign: 'left',
+                                    fontSize: 15,
+                                    fontWeight: '',
+                                    paddingTop: 17,
+                                    paddingBottom: 17
+                                }
+                            }
+                        },
+                        {
+                            componentName: 'convJumpLinkComponent',
+                            id: Math.random().toString(36).slice(3),
+                            data: {
+                                isIcon: false,
+                                linkType: 'h5',
+                                jumpType: 'h5',
+                                link: '',
+                                ios: {
+                                    appid: '',
+                                    link: ''
+                                },
+                                android: {
+                                    appid: '',
+                                    link: ''
+                                },
+                                text: '了解详情',
+                                style: {
+                                    borderColor: '',
+                                    fontColor: '#fff',
+                                    backgroundColor: '#07C160',
+                                    fontWeight: 'normal',
+                                    paddingTop: 17,
+                                    paddingBottom: 17
                                 }
                             }
                         },
@@ -60,6 +101,8 @@ export default {
                                 }
                             }
                         }
+                        
+                        */
                     ],
                 }
             ],
@@ -74,6 +117,7 @@ export default {
             mittBus.on('switchCurrentActive', switchCurrentActive);
             mittBus.on('deleteItem', deleteItem);
             mittBus.on('setItemData', setItemData);
+            mittBus.on('addItem', addItem);
         });
 
 
@@ -83,6 +127,7 @@ export default {
             mittBus.off('switchCurrentActive', switchCurrentActive);
             mittBus.off('deleteItem', deleteItem);
             mittBus.off('setItemData', setItemData);
+            mittBus.off('addItem', addItem);
         });
 
 
@@ -94,17 +139,41 @@ export default {
         // 删除项
         function deleteItem(id) {
 
+            let fatherIndex = null;
+            let sonIndex = null;
+            let fatherBol = null;
+            let sonBol = null;
+            for (let i = 0; i < state.pagesDatas.length; i++) {
+                const item = state.pagesDatas[i];
+                if (id === item.id) {
+                    fatherBol = true;
+                };
+
+                for(let l = 0; l < item.components.length; l++){
+                     const item1 = item.components[l];
+                     if(id === item1.id){
+                        sonBol = true;
+                        fatherIndex = i;
+                        sonIndex = l;
+                     }
+                }
+            };
+
+            if(sonBol){
+                const bool = id === state.pagesDatas[fatherIndex].components[sonIndex].id;
+                state.pagesDatas[fatherIndex].components.splice(sonIndex, 1); // 进行删除
+                bool && (state.currentActive = null);
+            }
         };
 
 
         // 修改数据
         function setItemData(data = {}) {
             const item = getItem();
-
-            if(!item){
-               return 
-            }; 
-            item.data = data; 
+            if (!item) {
+                return
+            };
+            item.data = data;
         };
 
 
@@ -125,8 +194,13 @@ export default {
             }
         };
 
+        // 添加项
+        function addItem(info = { parentIndex : 0, childIndex: null, itemAllComData: { } }){
+              state.pagesDatas[info.parentIndex].components[info.childIndex === null ? state.pagesDatas[info.parentIndex].components.length : ''] = info.itemAllComData;
+        };
+
         // 修改背景颜色
-        function setBackColor(e){
+        function setBackColor(e) {
             state.pagesDatas[e.index].backColor = e.color;
         };
 

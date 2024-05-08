@@ -6,7 +6,7 @@
                 motion: state.currentActivityIndex == index ? !state.isPress : motionState.isPressMotion,
                 cancel: item.src,
                 active: state.activeId === item.id
-            }" @click="triggerChangeEvent(item, index)" @mousedown="mousedown(index, $event)" :style="{
+            }" @click.stop="triggerChangeEvent(item, index, false)" @mousedown="mousedown(index, $event)" :style="{
                 top: getCoBol(index) ? (state.currentY + 'px') : null,
                 left: getCoBol(index) ? (state.currentX + 'px') : null,
                 transform: handleTransform(index)
@@ -20,6 +20,17 @@
                 </svg>
 
                 <img v-else :src="item.src" class="cardItem_img" />
+
+
+                <div v-if="item.src" class="fixed" @click.stop="triggerChangeEvent(item, index, true)">
+                    <span>{{ index + 1 }}</span>
+                    <svg class="adui-icon-base" width="12" height="12" viewBox="0 0 18 18" fill="#fff"
+                        data-interactive="false" data-icon="replace">
+                        <path
+                            d="M3.5 3.5V6.5H6.5V3.5H3.5ZM16 10V16H10V10H16ZM3.5 9V10.5C3.5 11.7426 4.50736 12.75 5.75 12.75H7V11L9.75 13.5L7 16V14.25H5.75C3.67893 14.25 2 12.5711 2 10.5V9H3.5ZM14.5 11.5H11.5V14.5H14.5V11.5ZM11 2V3.75H12.25C14.3211 3.75 16 5.42893 16 7.5V9H14.5V7.5C14.5 6.25736 13.4926 5.25 12.25 5.25H11V7L8.25 4.5L11 2ZM8 2V8H2V2H8Z"
+                            fill-rule="evenodd"></path>
+                    </svg>
+                </div>
 
             </div>
         </div>
@@ -44,7 +55,7 @@ const props = defineProps({
         default: null
     },
     carousel: {
-        default(){
+        default() {
             return []
         }
     }
@@ -73,6 +84,8 @@ const state = reactive({
     activeId: props.currentId, // 当前选中的id
 });
 
+
+// 每一项的宽高
 const cardItemInfo = reactive({
     width: 73,
     height: 73
@@ -91,6 +104,8 @@ onMounted(() => {
     initListDomInfo();
 });
 
+
+// 监听数量的变化
 watch(() => { return props.listNum }, () => {
     setLists();
 
@@ -245,9 +260,7 @@ function determineLocation() {
                 }
 
                 state.vacancyIndex = myIndex
-            }
-
-
+            };
 
         };
 
@@ -257,7 +270,7 @@ function determineLocation() {
         return
     }
 
-    if (myTop < top - cardItemInfo.height || myTop > myTop1 || myLeft < left - cardItemInfo.width || myLeft > myLeft1) {
+    /* if (myTop < top - cardItemInfo.height || myTop > myTop1 || myLeft < left - cardItemInfo.width || myLeft > myLeft1) {
         motionState.isWhether = true;
         state.vacancyIndex = 0;
         for (let i = 0; i < state.currentActivityIndex; i++) {
@@ -269,7 +282,7 @@ function determineLocation() {
             itme.x = x;
             itme.y = y;
         }
-    };
+    }; */
 };
 
 // 处理对应Transform的值
@@ -293,8 +306,8 @@ function endEvent() {
         // 获取当前拖动元素的信息
         const item = state.lists[state.currentActivityIndex];
 
-         // 计算要删除的元素索引
-         const index1 = state.currentActivityIndex < state.vacancyIndex ? state.vacancyIndex + 1 : state.vacancyIndex;
+        // 计算要删除的元素索引
+        const index1 = state.currentActivityIndex < state.vacancyIndex ? state.vacancyIndex + 1 : state.vacancyIndex;
 
         // 将拖动元素插入到新位置
         state.lists.splice(index1, 0, item);
@@ -305,7 +318,7 @@ function endEvent() {
         // 从原来位置删除元素
         state.lists.splice(index, 1);
 
-       
+
 
     };
 
@@ -322,17 +335,22 @@ function endEvent() {
 
 
 // 触发change事件
-function triggerChangeEvent(item, index) {
+function triggerChangeEvent(item, index, force) {
 
-    if (state.lists[index].src || state.isMove) {
-        state.lists[index].src && (state.activeId = item.id)
-        state.lists[index].src && setData();
+    // 判断是否选中
+    if (state.lists[index].src && !state.isMove && !force) {
+
+        state.activeId = item.id;
+        setData();
         return
+    } else if ((!state.lists[index].src && !state.isMove) || force) { // 判断是否是上传图片
+
+        imageInput.value.click();
+        triggerChangeEvent.index = index; // 当前索引
+        triggerChangeEvent.id = item.id;  // 当前id
     }
 
-    imageInput.value.click();
-    triggerChangeEvent.index = index;
-    triggerChangeEvent.id = item.id;
+
 };
 
 // 上传图片
@@ -436,6 +454,46 @@ function setData() {
             .cardItem_img {
                 width: 100%;
                 height: 100%;
+            }
+
+
+            .fixed {
+                position: absolute;
+                width: 16px;
+                height: 16px;
+                border-radius: 50%;
+                color: #d6d6d6;
+                font-size: 11px;
+                background-color: rgba(0, 0, 0, 0.6);
+                top: 3px;
+                right: 5px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                span {
+                    display: inline-block;
+                }
+
+                svg {
+                    display: none;
+                }
+            }
+
+
+            &:hover {
+                .fixed {
+                    width: 18px;
+                    height: 18px;
+
+                    span {
+                        display: none;
+                    }
+
+                    svg {
+                        display: block;
+                    }
+                }
             }
 
         }

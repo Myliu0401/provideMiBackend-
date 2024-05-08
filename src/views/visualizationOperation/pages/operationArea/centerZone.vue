@@ -2,16 +2,18 @@
     <div class="centerZone" @click="deselect">
 
         <div class="content">
-            <div v-for="page,index in pagesDatas" :key="page.id" class="module" @click.stop="" :style="{ backgroundColor: page.backColor }">
+            <div v-for="page, index in pagesDatas" :key="page.id" class="module" @click.stop=""
+                :style="{ backgroundColor: page.backColor }">
 
                 <div class="backBox">
                     <span class="text">1</span>
-                    <el-color-picker :model-value="page.backColor" show-alpha @active-change="setBackColor(index, $event)"/>
+                    <el-color-picker :model-value="page.backColor" show-alpha
+                        @active-change="setBackColor(index, $event)" />
                     <span class="text1">背景</span>
                 </div>
- 
+
                 <CutSleeveVue v-for="item in page.components" :key="item.id" :activeId="activeId" :id="item.id">
-                    <component  :is="item.componentName" :itemData="item.data"></component >
+                    <component :is="item.componentName" :itemData="item.data"></component>
                 </CutSleeveVue>
             </div>
         </div>
@@ -24,19 +26,22 @@
 <script>
 import { reactive, onMounted, onUnmounted, ref } from 'vue';
 import TopImgComponent from '../components/topImgComponent/index.vue';
-import BasisImgComponent from '../components/basisImgComponent/index.vue';
 import TopCarouselComponent from '../components/topCarouselComponent/index.vue';
+import BasisImgComponent from '../components/basisImgComponent/index.vue';
+import BasisCarouselComponent from '../components/basisCarouselComponent/index.vue';
 import BasisTextComponent from '../components/basisTextComponent/index.vue';
+import ConvJumpLinkComponent from '../components/convJumpLinkComponent/index.vue';
 import CutSleeveVue from '../components/cutSleeve.vue';
 import mittBus from '/@/utils/mitt'; // 事件总线
 
+
 export default {
 
-    components: { TopImgComponent, BasisImgComponent, TopCarouselComponent, BasisTextComponent, CutSleeveVue },
+    components: { TopImgComponent, BasisImgComponent, BasisCarouselComponent, BasisTextComponent, TopCarouselComponent, ConvJumpLinkComponent, CutSleeveVue },
 
     props: {
         pagesDatas: {
-            default(){
+            default() {
                 return []
             }
         },
@@ -51,16 +56,16 @@ export default {
             backColor: props
         });
 
-       // 取消选中
-       function deselect(){
-          mittBus.emit('switchCurrentActive', null); // 触发事件
-       };
-       
-       
-       // 修改背景颜色
-       function setBackColor(index, color){
-         emit('setBackColor', { index, color });
-       }
+        // 取消选中
+        function deselect() {
+            mittBus.emit('switchCurrentActive', null); // 触发事件
+        };
+
+
+        // 修改背景颜色
+        function setBackColor(index, color) {
+            emit('setBackColor', { index, color });
+        }
 
         return {
             deselect,
@@ -115,7 +120,7 @@ export default {
             }
 
 
-            
+
         }
     }
 

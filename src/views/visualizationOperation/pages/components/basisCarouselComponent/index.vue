@@ -5,9 +5,9 @@
 
 
 
-<script setup name="basisTextComponent">
+<script setup name="basisCarouselComponent">
 import { reactive, onMounted, onUnmounted, ref, defineProps } from 'vue';
-import Original from "./original.vue";
+import Original from './original.vue';
 import Effect from './effect.vue';
 
 const props = defineProps({
@@ -21,12 +21,19 @@ const props = defineProps({
 
 // 判断是否有数据
 function thereDetermine(){
-    return !!props.itemData.text;
+      for(let i = 0; i < props.itemData.carousel.length; i++){
+          const item = props.itemData.carousel[i];
+          if(item.src){
+              return true
+          }
+      }
+
+      return false;
 };
+
+
+
 </script>
 
 
-
-<style lang="scss" scoped>
-
-</style>
+<style lang="scss" scoped></style>

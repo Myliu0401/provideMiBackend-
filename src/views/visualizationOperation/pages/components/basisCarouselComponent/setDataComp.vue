@@ -1,7 +1,7 @@
 <template>
     <div class="modifyingInformation">
         <div class="item" style="padding-bottom: 0px;">
-            <p class="title">顶部组件: 轮播图</p>
+            <p class="title">基础组件: 轮播图</p>
             <el-tag style="margin: 15px 20px;" type="primary" size="default">支持腾讯广告全广告位</el-tag>
 
             <div class="promptBox">
@@ -39,7 +39,7 @@
 
 
 
-<script setup name="topCarouselComponent">
+<script setup name="basisCarouselComponent">
 import { reactive, onMounted, onUnmounted, ref, defineProps } from 'vue';
 import CardDragArea from '../../../components/CardDragArea.vue';
 

@@ -6,8 +6,8 @@
                     end-placeholder="结束日期" size="default" style="margin-right: 5px;" />
                 <el-input v-model="state.keyword" style="width: 180px; margin-right: 5px;" placeholder="项目名称" clearable
                     size="default" />
-                <el-button :icon="Refresh" size="default">重置</el-button>
-                <el-button type="primary" :icon="Search" size="default">搜索</el-button>
+                <el-button :icon="Refresh" size="default" @click="reset">重置</el-button>
+                <el-button type="primary" :icon="Search" size="default" @click="search">搜索</el-button>
             </div>
             <div>
                 <el-button :icon="Plus" size="default" @click="enterProjectCreation">创建项目</el-button>
@@ -17,11 +17,15 @@
 
 
         <div class="projectList_main">
-            <el-table :data="tableData" border max-height="70%" style="width: 100%">
+            <el-table v-loading="listData.loading" :data="listData.lists" border max-height="70%" style="width: 100%;">
                 <el-table-column prop="id" label="id" align="center" />
                 <el-table-column prop="name" label="项目名称" align="center" />
                 <el-table-column prop="address" label="操作" width="100px;" align="center" />
             </el-table>
+
+            <el-pagination background layout="prev, pager, next" :total="listData.total" size="default" style=" display: flex;
+    justify-content: end;
+    margin-top: 20px;" />
         </div>
 
         <teleport to="#app">
@@ -37,6 +41,7 @@
 import { reactive, onMounted, ref, watch, nextTick, onActivated, markRaw } from 'vue';
 import { Search, Refresh, Plus } from '@element-plus/icons-vue';
 import AddProject from './components/AddProject.vue';
+import ListFunc from './composition/list.js';
 import { useRoute, useRouter } from 'vue-router';
 const route = useRoute();
 const router = useRouter();
@@ -51,10 +56,8 @@ const state = reactive({
 });
 
 
-// 唤醒创建项目窗口
-function wakeCreateProject() {
-    addProject.value.open();
-};
+const { listData, search, reset } = ListFunc();
+
 
 
 // 进入创建项目页

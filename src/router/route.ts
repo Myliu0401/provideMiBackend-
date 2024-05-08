@@ -1321,5 +1321,13 @@ export const staticRoutes: Array<RouteRecordRaw> = [
 		meta: {
 			title: 'message.router.visualizationOperation'
 		}
+	},
+	{
+		path: '/templateCreationPage',
+		name: 'templateCreationPage',
+		component: ()=> import('/@/views/templateCreationPage/index.vue'),
+		meta: {
+			title: 'message.router.templateCreationPage'
+		}
 	}
 ];

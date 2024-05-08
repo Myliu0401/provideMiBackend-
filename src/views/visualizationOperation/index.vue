@@ -30,8 +30,6 @@
         <div class="visualizationOperation_main">
             <TemplateArea v-if="currentType === 'templateArea'" @complete="enterTheOperationArea" />
             <OperationArea v-else-if="currentType === 'operationArea'" />
-
-
         </div>
     </div>
 </template>

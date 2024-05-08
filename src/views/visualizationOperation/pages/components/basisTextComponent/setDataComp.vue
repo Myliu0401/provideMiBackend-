@@ -9,7 +9,7 @@
             <p class="title">推广文案</p>
 
             <div class="inputTextarea">
-                <el-input v-model="state.text" style="width: 320px;" type="textarea" placeholder="请输入" />
+                <el-input v-model="state.text" style="width: 320px;" type="textarea" placeholder="请输入" @input="setText"/>
             </div>
         </div>
 
@@ -19,11 +19,12 @@
                 <span class="xian_title">字符样式</span>
                 <div class="xian_content">
                     <div class="left">
-                        <el-select @change="setFontSize" v-model="state.fontSize" placeholder="字体大小" style="width: 80px" size="default">
+                        <el-select @change="setFontSize" v-model="state.fontSize" placeholder="字体大小" style="width: 80px"
+                            size="default">
                             <el-option v-for="item in fontSizeOptions" :key="item.value" :label="item.label"
                                 :value="item.value" />
                         </el-select>
-                        <el-color-picker v-model="state.color" size="default" @active-change="setColor"/>
+                        <el-color-picker v-model="state.color" size="default" @active-change="setColor" />
                     </div>
 
                     <div class="buttons">
@@ -44,7 +45,8 @@
                                 fill-rule="evenodd"></path>
                         </svg>
                     </div>
-                    <div class="button" :class="{ active: state.alignment === 'center' }" @click="setAlignment('center')">
+                    <div class="button" :class="{ active: state.alignment === 'center' }"
+                        @click="setAlignment('center')">
                         <svg class="adui-button-leftIcon adui-icon-base" width="18" height="18" viewBox="0 0 18 18"
                             fill="#6b6b6b" data-interactive="false" data-icon="format-align-center">
                             <path
@@ -70,31 +72,47 @@
 
             <div class="itemBox">
                 <span class="itemBox_title">上边距</span>
-                <el-slider v-model="state.paddingTop" size="small" @input="setMargins('top')"/>
+                <el-slider v-model="state.paddingTop" size="small" @input="setMargins('top')" />
             </div>
 
             <div class="itemBox">
                 <span class="itemBox_title">下边距</span>
-                <el-slider v-model="state.paddingBottom" size="small" @input="setMargins('bottom')"/>
+                <el-slider v-model="state.paddingBottom" size="small" @input="setMargins('bottom')" />
             </div>
         </div>
-        
+
     </div>
 </template>
 
 
 <script setup name="basisTextComponent">
 import { reactive, onMounted, onUnmounted, ref, defineProps } from 'vue';
+import mittBus from '/@/utils/mitt'; // 事件总线
+
+const corr = {
+    14: 1,
+    15: 2
+};
+
+const props = defineProps({
+    componentData: {
+        default() {
+            return {
+
+            }
+        }
+    }
+});
 
 
 const state = reactive({
-    text: '',
-    color: '',
-    alignment: 'left', // 对齐方式
-    bold: false, // 是否加错
-    fontSize: 2, // 字体大小
-    paddingTop: 17, // 上边距
-    paddingBottom: 17 // 下边距
+    text: props.componentData.text,
+    color: props.componentData.style.fontColor,
+    alignment: props.componentData.style.textAlign, // 对齐方式
+    bold: props.componentData.style.fontWeight === 'bold', // 是否加粗
+    fontSize: corr[props.componentData.style.fontSize], // 字体大小
+    paddingTop: props.componentData.style.paddingTop, // 上边距
+    paddingBottom: props.componentData.style.paddingBottom // 下边距
 });
 
 // 字体大小选项
@@ -110,33 +128,76 @@ const fontSizeOptions = ref([
 ]);
 
 
+// 修改文本
+function setText(){
+    setFinalStatus();
+};
+
 // 修改字体是否加粗
-function setBold(bol = false){
-     state.bold = bol;
+function setBold(bol = false) {
+    if(state.bold === bol){
+       return  
+    }
+    state.bold = bol;
+    setFinalStatus();
 };
 
 
 // 修改对齐方式
-function setAlignment(type){
-   state.alignment = type;
+function setAlignment(type) {
+    if(state.alignment === type){
+       return  
+    }
+    state.alignment = type;
+    setFinalStatus()
 };
 
 
 // 修改边距
-function setMargins(type){
+function setMargins(type, size) {
     
+    setFinalStatus()
+
 };
 
 
 // 修改字体大小
-function setFontSize(){
-      console.log(state.fontSize)
-}
+function setFontSize(size) {
+
+  //  fontSizeOptions.value.map((item)=>{ return item.value }).indexOf(size);
+
+    setFinalStatus()
+};
 
 // 修改字体颜色
-function setColor(color){
-    console.log(color)
-}
+function setColor(color) {
+    if(state.color === color){
+       return  
+    }
+
+    state.color = color;
+    setFinalStatus()
+};
+
+// 修改最终状态
+function setFinalStatus() {
+
+    const item = fontSizeOptions.value.filter((item)=>{ return item.value == state.fontSize })[0];
+
+    mittBus.emit('setItemData', {
+        ...props.componentData,
+        text: state.text,
+        style: {
+            ...props.componentData.style,
+            fontWeight: state.bold ? 'bold' : 'normal',
+            fontColor: state.color,
+            textAlign: state.alignment,
+            fontSize: item.label,
+            paddingTop: state.paddingTop,
+            paddingBottom: state.paddingBottom
+        }
+    });
+};
 </script>
 
 
@@ -245,6 +306,7 @@ function setColor(color){
             padding: 0px 20px;
             align-items: center;
             margin-top: 7px;
+
             .itemBox_title {
                 white-space: nowrap;
                 display: inline-block;

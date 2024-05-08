@@ -1,5 +1,5 @@
 <template>
-    <div class="original">
+    <div class="original" :style="{ paddingTop: itemData.style.paddingTop + 'px', paddingBottom: itemData.style.paddingBottom + 'px' }">
         <div class="textarea" >
              请在右侧输入文本
         </div>
@@ -9,7 +9,20 @@
 
 <script>
 export default {
+    props: {
+        itemData: {
+            default() {
+                return {
 
+                }
+            }
+        }
+    },
+
+
+    setup(props, { emit }){
+       
+    }
 }
 </script>
 
@@ -17,7 +30,7 @@ export default {
 
 <style lang="scss" scoped>
 .original {
-    padding: 17px 24px;
+    padding: 0px 24px;
     .textarea {
         border: none;
         background: transparent;
