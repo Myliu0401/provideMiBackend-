@@ -8,8 +8,9 @@
             <div class="itemBox">
                 <div class="itemBoxTitle">顶部组件</div>
                 <ul class="itemBox_ul">
-                    <li class="ul_li" :class="{ down: state.downId === item.id }" v-for="item in topComState.components"
-                        :key="item.id" @mousedown="mousedown(item.id)" @click.stop="addComponent(item)">
+                    <li class="ul_li" :class="{ down: state.downId === item.id, disabled: isAllDisabled }"
+                        v-for="item in topComState.components" :key="item.id" @mousedown="mousedown(item.id)"
+                        @click.stop="addComponent(item)">
                         <component :is="item.name" />
                         <span>{{ item.text }}</span>
                     </li>
@@ -19,8 +20,9 @@
             <div class="itemBox">
                 <div class="itemBoxTitle">基础组件</div>
                 <ul class="itemBox_ul">
-                    <li class="ul_li" :class="{ down: state.downId === item.id }"
-                        v-for="item in basisComState.components" :key="item.id" @mousedown="mousedown(item.id)"  @click.stop="addComponent(item)">
+                    <li class="ul_li" :class="{ down: state.downId === item.id, disabled: isAllDisabled }"
+                        v-for="item in basisComState.components" :key="item.id" @mousedown="mousedown(item.id)"
+                        @click.stop="addComponent(item)">
                         <component :is="item.name" />
                         <span>{{ item.text }}</span>
                     </li>
@@ -30,8 +32,9 @@
             <div class="itemBox">
                 <div class="itemBoxTitle">转换按钮</div>
                 <ul class="itemBox_ul">
-                    <li class="ul_li" :class="{ down: state.downId === item.id }"
-                        v-for="item in convButtonState.components" :key="item.id" @mousedown="mousedown(item.id)"  @click.stop="addComponent(item)">
+                    <li class="ul_li" :class="{ down: state.downId === item.id, disabled: isAllDisabled }"
+                        v-for="item in convButtonState.components" :key="item.id" @mousedown="mousedown(item.id)"
+                        @click.stop="addComponent(item)">
                         <component :is="item.name" />
                         <span>{{ item.text }}</span>
                     </li>
@@ -53,9 +56,19 @@ import BasisTextIcon from './components/BasisTextIcon.vue';
 import ConvJumpLinkIocn from './components/ConvJumpLinkIocn.vue';
 import mittBus from '/@/utils/mitt'; // 事件总线
 
+
+
 export default {
 
     components: { TopImgIcon, TopCarouselIcon, BasisImgIcon, BasisCarouselIcon, BasisTextIcon, ConvJumpLinkIocn },
+
+    props: {
+
+        // 是否所有选项都禁用
+        isAllDisabled: {
+            default: false
+        }
+    },
 
     setup(props, { emit }) {
 
@@ -212,6 +225,9 @@ export default {
 
         // 鼠标按下事件
         function mousedown(id) {
+            if (props.isAllDisabled) {
+                return
+            }
             state.downId = id;
             window.addEventListener('mouseup', mouseup);
         };
@@ -223,10 +239,11 @@ export default {
 
 
         // 添加组件
-        function addComponent(item){
-
+        function addComponent(item) {
+            if (props.isAllDisabled) {
+                return
+            }
             mittBus.emit('addItem', { parentIndex: 0, childIndex: null, itemAllComData: item.createRawData() });
-
         };
 
 
@@ -294,7 +311,7 @@ export default {
                     margin-right: 1px;
                     transition: transform 0.2s;
 
-                    &:hover {
+                    &:not(.disabled):hover {
                         z-index: 1;
                         background-color: #FDFDFD;
                         box-shadow: 0 0 0 1px #D6D6D6;
@@ -310,12 +327,14 @@ export default {
                     }
 
 
-                    &.disabled{
+                    &.disabled {
                         cursor: default;
-                        span{
+
+                        span {
                             opacity: 0.3;
                         }
-                        svg{
+
+                        svg {
                             opacity: 0.3;
                         }
                     }

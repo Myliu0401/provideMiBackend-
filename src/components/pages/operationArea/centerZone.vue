@@ -12,7 +12,7 @@
                     <span class="text1">背景</span>
                 </div>
 
-                <CutSleeveVue v-for="item in page.components" :key="item.id" :activeId="activeId" :id="item.id">
+                <CutSleeveVue v-for="item in page.components" :key="item.id" :activeId="activeId" :id="item.id" :disabled="isAllDisabled">
                     <component :is="item.componentName" :itemData="item.data"></component>
                 </CutSleeveVue>
             </div>
@@ -47,6 +47,10 @@ export default {
         },
         activeId: {
             default: null
+        },
+
+        isAllDisabled: {
+            default: false
         }
     },
 

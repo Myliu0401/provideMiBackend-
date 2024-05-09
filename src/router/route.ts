@@ -92,13 +92,14 @@ export const dynamicRoutes: Array<RouteRecordRaw> = [
 							isAffix: false,
 							isIframe: false,
 							roles: ['admin'],
-							icon: 'iconfont icon-caidan',
+							icon: 'iconfont icon-xitongshezhi',
 						},
 					},
 				]
-			},
+			}, 
+			
 
-			{
+			{    /* 项目 */
                  path: '/project',
 				 name: 'project',
 				 component: () => import('/@/layout/routerView/parent.vue'),

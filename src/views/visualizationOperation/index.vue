@@ -21,16 +21,18 @@
                     <div class="a" style="border-left-color: rgba(255, 255, 255, 0.25);"></div>
                     <div class="b" style="border-left-color: rgb(0 0 0);"></div>
                 </div>
-                <div class="item">
-                    <span class="text">分享设置</span>
-                </div>
+                <el-button type="primary" size="small" :disabled="currentType === 'templateArea'" @click="wakeUpInfoPopup">创建项目</el-button>
             </div>
         </div>
 
         <div class="visualizationOperation_main">
             <TemplateArea v-if="currentType === 'templateArea'" @complete="enterTheOperationArea" />
-            <OperationArea v-else-if="currentType === 'operationArea'" />
+            <OperationArea v-else-if="currentType === 'operationArea'" ref="operationArea"/>
         </div>
+
+        <teleport to="#app">
+            <ProjectInfoPopup ref="projectInfoPopup" />
+        </teleport>
     </div>
 </template>
 
@@ -39,12 +41,16 @@
 <script setup name="visualizationOperation">
 import { NextLoading } from '/@/utils/loading';
 import { reactive, onMounted, onUnmounted, ref } from 'vue';
-import OperationArea from './pages/operationArea/index.vue'; // 可视化操作
+import OperationArea from '../../components/pages/operationArea/index.vue'; // 可视化操作
 import TemplateArea from './pages/templateArea/index.vue'; // 模板选择页
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus';
+import ProjectInfoPopup from './components/ProjectInfoPopup.vue';
 
 
+const projectInfoPopup = ref(null);
+const operationArea = ref(null);
 const currentType = ref('templateArea');
+
 
 onMounted(() => {
     NextLoading.done(); // 关闭进度条
@@ -52,8 +58,11 @@ onMounted(() => {
 
 
 // 进入操作区
-function enterTheOperationArea(item) {
+function enterTheOperationArea(params) {
     currentType.value = 'operationArea';
+    setTimeout(()=>{
+        operationArea.value.externalFillData(params)
+    }, 16);
 };
 
 // 回退到模板
@@ -78,6 +87,11 @@ async function fallbackToTemplate() {
     }
 };
 
+
+// 唤醒填写信息窗口
+function wakeUpInfoPopup(){
+    projectInfoPopup.value.openPopup();
+};
 
 </script>
 

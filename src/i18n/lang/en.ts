@@ -7,6 +7,7 @@ export default {
 		projectList: 'projectList',
 		templateList: 'templateList',
 		visualizationOperation: 'visualizationOperation',
+		templateCreationPage: 'templateCreationPage',
 		system: 'system',
 		systemMenu: 'systemMenu',
 		systemRole: 'systemRole',

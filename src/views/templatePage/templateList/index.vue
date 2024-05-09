@@ -1,27 +1,49 @@
 <template>
     <div class="templateList">
-        <div class="templateList_selectionArea">
-            <el-date-picker v-model="state.dateTime" type="daterange" range-separator="至" start-placeholder="开始日期"
-                end-placeholder="结束日期" size="default" style="margin-right: 5px;"/>
-                <el-button type="primary" :icon="Search" size="default">搜索</el-button>
+        <div class="templateList_selectionArea" style="display: flex; justify-content: space-between;">
+            <div>
+                <el-date-picker v-model="listData.dateTimes" type="daterange" range-separator="至"
+                    start-placeholder="开始日期" end-placeholder="结束日期" size="default" style="margin-right: 5px;" />
+                <el-button :icon="Refresh" size="default" @click="reset">重置</el-button>
+                <el-button type="primary" :icon="Search" size="default" @click="search">搜索</el-button>
+            </div>
+
+            <el-button :icon="Plus" size="default" @click="enterTemplateCreation">创建模板</el-button>
         </div>
 
-        <div class="templateList_main">
-            <div class="main_box">
-                <ul class="box_ul">
-                    <li class="item">
-                         <div class="mengcheng">
-                            <div class="top"></div>
-                            <div class="bottoms">
-                                <el-button type="primary" round>使用</el-button>
-                                <el-button round>预览</el-button>
-                            </div>
-                         </div>
-                    </li>
-                </ul>
-            </div>
+        <div class="templateList_content">
+            <el-table v-loading="listData.loading" :data="listData.lists" border max-height="70%" style="width: 100%;"
+                stripe>
+                <el-table-column prop="id" label="id" align="center" width="80" />
+                <el-table-column prop="type" label="类型" align="center" />
+                <el-table-column prop="name" label="项目名称" align="center" />
+                <el-table-column prop="created_at" label="创建日期" align="center" />
+                <el-table-column prop="" label="示意图" align="center" width="150">
+                    <template #default="scope">
+                        <el-tooltip :content="`<img src=${scope.row.img} />`" raw-content>
+                            <img style="width: 35px; height: 35px; border-radius: 4px; cursor: pointer;"
+                                :src="scope.row.img" />
+                        </el-tooltip>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="address" label="操作" width="120px;" align="center">
+                    <template #default="scope">
+                        <el-text class="mx-1" type="primary" @click="wakeUpPreview(scope.row)" size="default"
+                            style="cursor: pointer;">预览</el-text>
+                    </template>
+                </el-table-column>
+            </el-table>
+
+            <el-pagination background layout="prev, pager, next" :total="listData.total" small
+                style="display: flex; justify-content: end; margin-top: 20px;" />
         </div>
+
+        <teleport to="#app">
+            <H5model ref="h5model" />
+        </teleport>
     </div>
+
+
 </template>
 
 
@@ -29,18 +51,30 @@
 
 <script setup>
 import { reactive, onMounted, ref, watch, nextTick, onActivated, markRaw } from 'vue';
-import { Search } from '@element-plus/icons-vue';
+import { Search, Refresh, Plus } from '@element-plus/icons-vue';
+import listFunc from './composition/list.js';
+import H5model from '/@/components/H5model/index.vue';
 
+import { useRoute, useRouter } from 'vue-router';
+const route = useRoute();
+const router = useRouter();
 
-const state = reactive({
-    dateTime: [], // 日期时间
-    
-});
+const h5model = ref(null);
 
+const { listData, search, reset } = listFunc();
 
+// 唤醒预览窗口
+function wakeUpPreview(item) {
+    h5model.value.open();
+};
+
+// 进入创建模板
+function enterTemplateCreation(){
+    router.push('/templateCreationPage');
+};
 </script>
 
 
 <style lang="scss" scoped>
-  @import './index.scss';
+@import './index.scss';
 </style>

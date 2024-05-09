@@ -83,7 +83,7 @@ export default {
         transform: translate(-50%, -50%);
         width: 306px;
         height: 600px;
-        background-image: url(../../../../assets/imgs/shouji1.png);
+        background-image: url(../../assets/imgs/shouji1.png);
         border-top-left-radius: 50px;
         border-top-right-radius: 50px;
         border-bottom-left-radius: 44px;

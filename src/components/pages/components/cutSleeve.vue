@@ -1,7 +1,7 @@
 <template>
-    <div class="cutSleeve" :class="{ active: id === activeId }" @click.stop="switchSelection">
+    <div class="cutSleeve" :class="{ active: id === activeId, disabled: disabled }" @click.stop="switchSelection">
         <slot></slot>
-        <DeleteBox :id="id"/>
+        <DeleteBox :id="id" />
     </div>
 </template>
 
@@ -25,13 +25,18 @@ export default {
         // 该项的id
         id: {
             default: null
+        },
+
+        // 是否进行操作
+        disabled: {
+            default: false
         }
     },
 
-    setup(props, { emit }){
+    setup(props, { emit }) {
 
         // 切换选中
-        function switchSelection(){
+        function switchSelection() {
             mittBus.emit('switchCurrentActive', props.id); // 通知事件
         };
 
@@ -42,15 +47,21 @@ export default {
 
 
 <style lang="scss" scoped>
-.cutSleeve{
+.cutSleeve {
     position: relative;
+
+    &:not(.disabled):hover {
+        box-shadow: 0 0 0 1px #07c160;
+        z-index: 1;
+
+        .deleteBox {
+            display: flex;
+        }
+    }
 
     &:hover {
         box-shadow: 0 0 0 1px #07c160;
         z-index: 1;
-        .deleteBox {
-            display: flex;
-        }
     }
 
     &.active {

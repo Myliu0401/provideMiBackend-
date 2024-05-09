@@ -7,6 +7,7 @@ export default {
 		project: '项目',
 		projectList: '项目列表',
 		visualizationOperation: '可视化操作',
+		templateCreationPage: '创建模板',
 		system: '系统设置',
 		systemMenu: '菜单管理',
 		systemRole: '角色管理',
