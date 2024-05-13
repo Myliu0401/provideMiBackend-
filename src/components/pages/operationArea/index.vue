@@ -1,8 +1,8 @@
 <template>
     <div class="operationArea">
-        <LeftZone :pagesDatas="state.pagesDatas" :isAllDisabled="isAllDisabled()"/>
+        <LeftZone :pagesDatas="state.pagesDatas" :isAllDisabled="isAllDisabled()" />
         <CenterZone :pagesDatas="state.pagesDatas" @deselect="state.currentActive = null"
-            :activeId="state.currentActive" @setBackColor="setBackColor" :isAllDisabled="isAllDisabled()"/>
+            :activeId="state.currentActive" @setBackColor="setBackColor" :isAllDisabled="isAllDisabled()" />
         <RightZone :componentName="componentName" :componentData="componentData" />
     </div>
 </template>
@@ -112,6 +112,11 @@ export default {
 
 
         onBeforeMount(() => {
+
+            let data = sessionStorage.getItem('templateData');
+            data = data ? JSON.parse(data) : data;
+            data && externalFillData(data);
+
 
             // 注册事件
             mittBus.on('switchCurrentActive', switchCurrentActive);
@@ -255,8 +260,8 @@ export default {
         };
 
 
-        function isAllDisabled(){
-             return window.location.href.includes('visualizationOperation');
+        function isAllDisabled() {
+            return window.location.href.includes('visualizationOperation');
         };
 
         return { state, componentName, componentData, setBackColor, externalDataAcquisition, externalFillData, isAllDisabled };

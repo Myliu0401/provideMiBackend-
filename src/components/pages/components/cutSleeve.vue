@@ -51,15 +51,14 @@ export default {
     position: relative;
 
     &:not(.disabled):hover {
-        box-shadow: 0 0 0 1px #07c160;
-        z-index: 1;
+       
 
         .deleteBox {
             display: flex;
         }
     }
 
-    &:hover {
+    &:not(.active):hover {
         box-shadow: 0 0 0 1px #07c160;
         z-index: 1;
     }

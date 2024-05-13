@@ -13,7 +13,7 @@ export function getProjectList(data = {}) {
 
 
 // 创建模板
-export function createTemplate(data = {}){
+export function createTemplate(data = {}) {
     return request({
         url: `/api/single/templates`,
         method: 'post',
@@ -22,7 +22,7 @@ export function createTemplate(data = {}){
 };
 
 // 获取模板列表
-export function getTemplateList(data = {}){
+export function getTemplateList(data = {}) {
     return request({
         url: `/api/single/templates${splicingParameters(data)}`,
         method: 'get',
@@ -31,11 +31,44 @@ export function getTemplateList(data = {}){
 };
 
 // 创建项目
-export function createProject(data = {}){
+export function createProject(data = {}) {
     return request({
         url: `/api/single/projects`,
         method: 'post',
         data,
+    });
+};
+
+
+// 修改项目
+export function setProject(data = {}) {
+    return request({
+        url: `/api/single/projects/${data.id}`,
+        method: 'put',
+        data,
+    });
+};
+
+
+// 修改模板
+export function setTemplate(data = {}){
+    return request({
+        url: `/api/single/templates/${data.id}`,
+        method: 'put',
+        data,
+    });
+};
+
+
+// 上传图片
+export function uploadImages(data = {}){
+    return request({
+        url: `/api/core/files`,
+        method: 'post',
+        data,
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
     });
 };
 
@@ -49,3 +82,5 @@ function splicingParameters(para = {}) {
 
     return canshu.length === 1 ? '' : canshu.slice(0, -1);
 };
+
+

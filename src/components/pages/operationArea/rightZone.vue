@@ -12,11 +12,22 @@ import BasisImgComponent from '../components/basisImgComponent/setDataComp.vue';
 import BasisCarouselComponent from '../components/basisCarouselComponent/setDataComp.vue';
 import BasisTextComponent from '../components/basisTextComponent/setDataComp.vue';
 import ConvJumpLinkComponent from '../components/convJumpLinkComponent/setDataComp.vue';
+import BasisBusinessCardComponent from '../components/basisBusinessCardComponent/setDataComp.vue';
+import MarketingFormComponent from '../components/marketingFormComponent/setDataComp.vue';
 
 
 export default {
 
-    components: { TopImgComponent, BasisImgComponent, BasisCarouselComponent, BasisTextComponent, TopCarouselComponent, ConvJumpLinkComponent },
+    components: { 
+        TopImgComponent, 
+        BasisImgComponent, 
+        BasisCarouselComponent, 
+        BasisTextComponent, 
+        TopCarouselComponent, 
+        ConvJumpLinkComponent,
+        BasisBusinessCardComponent,
+        MarketingFormComponent
+    },
 
     props: {
 

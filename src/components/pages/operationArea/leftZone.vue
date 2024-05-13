@@ -40,6 +40,19 @@
                     </li>
                 </ul>
             </div>
+
+
+            <div class="itemBox">
+                <div class="itemBoxTitle">营销组件</div>
+                <ul class="itemBox_ul">
+                    <li class="ul_li" :class="{ down: state.downId === item.id, disabled: isAllDisabled }"
+                        v-for="item in marketingComState.components" :key="item.id" @mousedown="mousedown(item.id)"
+                        @click.stop="addComponent(item)">
+                        <component :is="item.name" />
+                        <span>{{ item.text }}</span>
+                    </li>
+                </ul>
+            </div>
         </div>
     </div>
 </template>
@@ -54,13 +67,15 @@ import BasisImgIcon from './components/BasisImgIcon.vue';
 import BasisCarouselIcon from './components/BasisCarouselIcon.vue';
 import BasisTextIcon from './components/BasisTextIcon.vue';
 import ConvJumpLinkIocn from './components/ConvJumpLinkIocn.vue';
+import BasisBusinessCardIcon from './components/BasisBusinessCardIcon.vue';
+import MarketingFormIcon from './components/MarketingFormIcon.vue';
 import mittBus from '/@/utils/mitt'; // 事件总线
 
 
 
 export default {
 
-    components: { TopImgIcon, TopCarouselIcon, BasisImgIcon, BasisCarouselIcon, BasisTextIcon, ConvJumpLinkIocn },
+    components: { TopImgIcon, TopCarouselIcon, BasisImgIcon, BasisCarouselIcon, BasisTextIcon, ConvJumpLinkIocn, BasisBusinessCardIcon, MarketingFormIcon },
 
     props: {
 
@@ -117,6 +132,7 @@ export default {
         });
 
 
+        // 基础组件
         const basisComState = reactive({
             components: [
                 {
@@ -176,11 +192,32 @@ export default {
 
                         }
                     }
+                },
+                {
+                    text: '商家名片',
+                    name: 'BasisBusinessCardIcon',
+                    id: Math.random().toString(36).slice(3),
+                    createRawData() {
+                        return {
+                            componentName: 'basisBusinessCardComponent',
+                            id: Math.random().toString(36).slice(3),
+                            data: {
+                                storeName: '', // 门店名称
+                                storeAddress: '', // 门店地址
+                                storePhone: '', // 门店电话
+                                style: {
+                                    paddingTop: 17,
+                                    paddingBottom: 17
+                                }
+                            }
+                        }
+                    }
                 }
             ]
         });
 
 
+        // 按钮组件
         const convButtonState = reactive({
             components: [
                 {
@@ -222,6 +259,29 @@ export default {
         });
 
 
+        // 营销组件
+        const marketingComState = reactive({
+            components: [
+                {
+                    text: '表单',
+                    name: 'MarketingFormIcon',
+                    id: Math.random().toString(36).slice(3),
+                    createRawData() {
+                        return {
+                            componentName: 'marketingFormComponent',
+                            id: Math.random().toString(36).slice(3),
+                            data: {
+                                style: {
+                                    paddingTop: 17,
+                                    paddingBottom: 17
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+        });
+
 
         // 鼠标按下事件
         function mousedown(id) {
@@ -247,7 +307,7 @@ export default {
         };
 
 
-        return { state, topComState, basisComState, convButtonState, mousedown, mouseup, addComponent };
+        return { state, topComState, basisComState, convButtonState, marketingComState, mousedown, mouseup, addComponent };
     }
 }
 </script>

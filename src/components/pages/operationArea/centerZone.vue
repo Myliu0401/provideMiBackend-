@@ -12,12 +12,19 @@
                     <span class="text1">背景</span>
                 </div>
 
-                <CutSleeveVue v-for="item in page.components" :key="item.id" :activeId="activeId" :id="item.id" :disabled="isAllDisabled">
+                <CutSleeveVue v-for="item in page.components" :key="item.id" :activeId="activeId" :id="item.id"
+                    :disabled="isAllDisabled">
                     <component :is="item.componentName" :itemData="item.data"></component>
                 </CutSleeveVue>
             </div>
         </div>
 
+
+        <el-icon class="IphoneIcon" size="25" title="预览" @click="openPreview"><ele-Iphone /></el-icon>
+
+        <teleport to="#app">
+            <H5model ref="h5model" />
+        </teleport>
     </div>
 </template>
 
@@ -32,12 +39,26 @@ import BasisCarouselComponent from '../components/basisCarouselComponent/index.v
 import BasisTextComponent from '../components/basisTextComponent/index.vue';
 import ConvJumpLinkComponent from '../components/convJumpLinkComponent/index.vue';
 import CutSleeveVue from '../components/cutSleeve.vue';
+import BasisBusinessCardComponent from '../components/basisBusinessCardComponent/index.vue';
+import MarketingFormComponent from '../components/marketingFormComponent/index.vue';
+import H5model from '/@/components/H5model/index.vue';
 import mittBus from '/@/utils/mitt'; // 事件总线
 
 
 export default {
 
-    components: { TopImgComponent, BasisImgComponent, BasisCarouselComponent, BasisTextComponent, TopCarouselComponent, ConvJumpLinkComponent, CutSleeveVue },
+    components: { 
+        H5model, 
+        TopImgComponent, 
+        BasisImgComponent, 
+        BasisCarouselComponent, 
+        BasisTextComponent, 
+        TopCarouselComponent, 
+        ConvJumpLinkComponent, 
+        CutSleeveVue, 
+        BasisBusinessCardComponent,
+        MarketingFormComponent
+    },
 
     props: {
         pagesDatas: {
@@ -60,6 +81,9 @@ export default {
             backColor: props
         });
 
+        const h5model = ref(null);
+
+
         // 取消选中
         function deselect() {
             mittBus.emit('switchCurrentActive', null); // 触发事件
@@ -69,11 +93,19 @@ export default {
         // 修改背景颜色
         function setBackColor(index, color) {
             emit('setBackColor', { index, color });
-        }
+        };
+
+
+        // 打开预览
+        function openPreview(){
+            h5model.value.open(props.pagesDatas);
+        };
 
         return {
             deselect,
-            setBackColor
+            openPreview,
+            setBackColor,
+            h5model
         }
     }
 }
@@ -157,6 +189,8 @@ export default {
 <style lang="scss">
 .centerZone {
 
+    position: relative;
+
     .content {
         .module {
             .backBox {
@@ -175,5 +209,19 @@ export default {
         }
     }
 
+
+
+    .IphoneIcon {
+        position: absolute;
+        cursor: pointer;
+        top: 10px;
+        right: 30px;
+        transition: all 0.2s;
+        transform: scale(1);
+
+        &:hover{
+            transform: scale(1.2);
+        }
+    }
 }
 </style>

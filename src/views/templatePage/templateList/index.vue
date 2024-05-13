@@ -28,8 +28,10 @@
                 </el-table-column>
                 <el-table-column prop="address" label="操作" width="120px;" align="center">
                     <template #default="scope">
-                        <el-text class="mx-1" type="primary" @click="wakeUpPreview(scope.row)" size="default"
-                            style="cursor: pointer;">预览</el-text>
+                        <el-text class="mx-1" type="primary" @click="wakeUpPreview(scope.row)" size="small"
+                            style="cursor: pointer; margin-right: 5px;">预览</el-text>
+                        <el-text class="mx-1" type="primary" @click="enterSetTemplate(scope.row)" size="small"
+                            style="cursor: pointer;">修改</el-text>
                     </template>
                 </el-table-column>
             </el-table>
@@ -65,11 +67,18 @@ const { listData, search, reset } = listFunc();
 
 // 唤醒预览窗口
 function wakeUpPreview(item) {
-    h5model.value.open();
+    h5model.value.open(item.params);
 };
 
 // 进入创建模板
-function enterTemplateCreation(){
+function enterTemplateCreation() {
+    sessionStorage.removeItem('templateData');
+    router.push('/templateCreationPage');
+};
+
+// 进入修改模板
+function enterSetTemplate(item){
+    sessionStorage.setItem('templateData', JSON.stringify(item.params));
     router.push('/templateCreationPage');
 };
 </script>

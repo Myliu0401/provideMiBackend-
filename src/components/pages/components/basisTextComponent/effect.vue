@@ -37,8 +37,9 @@ const props = defineProps({
     padding: 0px 24px;
 
     .textarea {
-        white-space: pre;
+        white-space: break-spaces;
         line-height: 19px;
+
     }
 }
 </style>
