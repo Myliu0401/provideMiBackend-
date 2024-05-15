@@ -9,7 +9,18 @@
             <p class="title">素材设置</p>
             <el-form style="margin: 0px 20px; margin-top: 10px;">
                 <el-form-item label="图片素材">
-                    <div class="uploadImages"></div>
+                    <div class="uploadImages" :class="{ none: state.loading || state.imgSrc }" @click="triggerChange">
+                        <el-icon v-if="state.loading" size="20"><ele-Loading /></el-icon>
+                        <img v-if="state.imgSrc" class="img" :src="state.imgSrc" />
+                        <div v-if="state.imgSrc" class="fixed" @click="replaceImage">
+                            <svg class="adui-icon-base" width="12" height="12" viewBox="0 0 18 18" fill="#fff"
+                                data-interactive="false" data-icon="replace">
+                                <path
+                                    d="M3.5 3.5V6.5H6.5V3.5H3.5ZM16 10V16H10V10H16ZM3.5 9V10.5C3.5 11.7426 4.50736 12.75 5.75 12.75H7V11L9.75 13.5L7 16V14.25H5.75C3.67893 14.25 2 12.5711 2 10.5V9H3.5ZM14.5 11.5H11.5V14.5H14.5V11.5ZM11 2V3.75H12.25C14.3211 3.75 16 5.42893 16 7.5V9H14.5V7.5C14.5 6.25736 13.4926 5.25 12.25 5.25H11V7L8.25 4.5L11 2ZM8 2V8H2V2H8Z"
+                                    fill-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                    </div>
                 </el-form-item>
             </el-form>
 
@@ -26,13 +37,18 @@
             <p class="title">边距</p>
             <div class="slider">
                 <span class="slider_text">上边距</span>
-                <el-slider v-model="state.marginTop" size="default" @input="setMarginData('marginTop', $event)" />
+                <el-slider v-model="state.paddingTop" size="default" @input="setMarginData('paddingTop', $event)" />
             </div>
             <div class="slider">
                 <span class="slider_text">下边距</span>
-                <el-slider v-model="state.marginBottom" size="default" @input="setMarginData('marginBottom', $event)" />
+                <el-slider v-model="state.paddingBottom" size="default" @input="setMarginData('paddingBottom', $event)" />
             </div>
         </div>
+
+
+        <teleport to="#app">
+            <input type="file" name="image" id="imageInput2" ref="imageInput" accept="image/*" @change="myUploadImages">
+        </teleport>
     </div>
 </template>
 
@@ -40,6 +56,7 @@
 
 <script setup name="basisImgComponent">
 import { reactive, onMounted, onUnmounted, ref, defineProps } from 'vue';
+import { uploadImages } from '/@/api/singlePage/index.js';
 import mittBus from '/@/utils/mitt'; // 事件总线
 
 const props = defineProps({
@@ -52,16 +69,73 @@ const props = defineProps({
     }
 });
 
+const imageInput = ref(null);
+
 const state = reactive({
-    marginTop: props.componentData.style.marginTop,  // 上边距
-    marginBottom: props.componentData.style.marginBottom, // 下边距
+    paddingTop: props.componentData.style.paddingTop,  // 上边距
+    paddingBottom: props.componentData.style.paddingBottom, // 下边距
+    imgSrc: props.componentData.imgSrc,
+    loading: false
 });
+
+// 触发change事件
+function triggerChange(){
+      if(state.loading || state.itemSrc){
+          return
+      }
+      imageInput.value.click();
+};
+
+// 替换图片
+function replaceImage() {
+    if (state.loading) {
+        return
+    };
+    imageInput.value.click();
+};
+
+
+// 上传图片
+async function myUploadImages() {
+    var formData = new FormData();
+    var fileInput = imageInput.value;
+    var file = fileInput.files[0];
+    formData.append('file', file);
+    formData.append('path', 'image');
+
+    state.loading = true;
+    let res = null;
+    try{
+        res = await uploadImages(formData);
+    }catch(err){
+        state.loading = false;
+        return
+    }
+    state.loading = false;
+
+    state.imgSrc = res.data.url;
+    setFinalData();
+};
+
+
+function setFinalData(){
+    mittBus.emit('setItemData', {
+        ...props.componentData,
+        imgSrc: state.imgSrc,
+        style: {
+            ...props.componentData.style,
+            paddingTop: state.paddingTop,
+            paddingBottom: state.paddingBottom
+        }
+    });
+};
 
 
 // 修改边距数据
 function setMarginData(type, value) {
     mittBus.emit('setItemData', {
         ...props.componentData,
+        imgSrc: state.imgSrc,
         style: {
             ...props.componentData.style,
             [type]: value
@@ -130,7 +204,7 @@ function setMarginData(type, value) {
             height: 72px;
             cursor: pointer;
 
-            &::before {
+            &:not(.none)::before {
                 content: '';
                 position: absolute;
                 width: 2px;
@@ -138,7 +212,7 @@ function setMarginData(type, value) {
                 background-color: #e3e3e3;
             }
 
-            &::after {
+            &:not(.none)::after {
                 content: '';
                 position: absolute;
                 width: 30%;
@@ -148,17 +222,54 @@ function setMarginData(type, value) {
 
             transition: all 0.3s;
 
-            &:hover {
-                border: 2px dashed #8f8f8f;
-                background-color: #e9e9e9;
+            &:not(.none):hover {
+                border: 2px dashed #c0c0c0;
+                background-color: #f1f1f1;
 
                 &::before {
-                    background-color: #8f8f8f;
+                    background-color: #c0c0c0
                 }
 
                 &::after {
-                    background-color: #8f8f8f;
+                    background-color: #c0c0c0
                 }
+            }
+
+            .img {
+                width: 100%;
+                height: 100%;
+            }
+
+            .el-icon {
+                animation: rotate360 2s linear infinite;
+                position: absolute;
+                z-index: 11;
+                /*  top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%); */
+
+            }
+
+            &:hover{
+                .fixed{
+                    display: flex;
+                }
+            }
+
+            .fixed {
+                position: absolute;
+                width: 16px;
+                height: 16px;
+                border-radius: 50%;
+                color: #d6d6d6;
+                font-size: 11px;
+                background-color: rgba(0, 0, 0, 0.6);
+                top: 3px;
+                right: 5px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                display: none;
             }
         }
 
@@ -183,6 +294,17 @@ function setMarginData(type, value) {
                 font-size: 12px;
             }
         }
+    }
+}
+
+
+@keyframes rotate360 {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
     }
 }
 </style>

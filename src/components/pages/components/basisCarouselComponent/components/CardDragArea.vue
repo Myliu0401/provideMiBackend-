@@ -3,13 +3,12 @@
         <div v-for="item, index in state.lists" class="cardBox" :class="{ press: state.currentActivityIndex === index }"
             :key="item.id">
             <div class="cardItem" :class="{
-                motion: state.currentActivityIndex == index ? !state.isPress : motionState.isPressMotion,
+                motion: state.currentActivityIndex !== index,
                 cancel: item.src,
                 active: state.activeId === item.id
             }" @click.stop="triggerChangeEvent(item, index, false)" @mousedown="mousedown(index, $event)" :style="{
-                top: getCoBol(index) ? (state.currentY + 'px') : null,
-                left: getCoBol(index) ? (state.currentX + 'px') : null,
-                transform: handleTransform(index)
+                top: state.inxis[index] && (state.inxis[index].y + 'px'),
+                left: state.inxis[index] && (state.inxis[index].x + 'px'),
             }">
 
                 <svg v-if="!item.src" class="icon" width="18" height="18" viewBox="0 0 18 18" data-interactive="false"
@@ -82,6 +81,10 @@ const state = reactive({
     vacancyIndex: null, // 空位的索引
     isMove: false, // 是否有移动
     activeId: props.currentId, // 当前选中的id
+
+
+    inxis: [],
+    lastTimeIndex: null
 });
 
 
@@ -148,8 +151,8 @@ function mousedown(index, e) {
 // 鼠标移动事件
 function mousemove(e) {
 
-    state.currentX = (e.clientX - state.pressX) + state.lastTimeX;
-    state.currentY = (e.clientY - state.pressY) + state.lastTimeY;
+    state.inxis[state.currentActivityIndex].x = e.clientX - state.pressX;
+    state.inxis[state.currentActivityIndex].y = e.clientY - state.pressY;
     state.isMove = true;
     determineLocation();
 };
@@ -193,8 +196,13 @@ function getCoBol(index) {
 // 初始化获取列表dom信息
 function initListDomInfo() {
     state.listDomInfo.length = 0;
+    state.inxis.length = 0;
     Array.from(cardDragArea.value.children).forEach((dom) => {
         state.listDomInfo.push(dom.firstChild.getBoundingClientRect());
+        state.inxis.push({
+            x: 0,
+            y: 0
+        })
     });
 
     state.lists.forEach((item) => { state.distancePerPosition[item.id] = { x: 0, y: 0 } });
@@ -217,11 +225,12 @@ function determineLocation() {
 
     const boxInfo = cardDragArea.value.getBoundingClientRect();
 
-    let lock = false;
+    /* let lock = false;
 
     if (myTop < boxInfo.top + boxInfo.height && myTop > boxInfo.top && myLeft < boxInfo.left + boxInfo.width && myLeft > boxInfo.left) {
         lock = true;
-    }
+    };
+ */
 
 
     for (let i = 0; i < state.listDomInfo.length; i++) {
@@ -229,13 +238,51 @@ function determineLocation() {
         const heightTop = item.top + cardItemInfo.height;
         const widthLeft = item.left + cardItemInfo.width;
 
-
         if (((myLeft + state.surplusX) < widthLeft) && ((myLeft + state.surplusX) > item.left) && ((myTop + state.surplusY) < heightTop) && (myTop + state.surplusY > item.top)) {
             const bol = widthLeft - (myLeft + state.surplusX) <= cardItemInfo.width / 2;
 
             const myIndex = state.currentActivityIndex > i ? bol ? i + 1 : i : bol ? i : i - 1;
-            motionState.isWhether = true;
 
+            console.log(myIndex)
+
+            return
+            if (state.currentActivityIndex < myIndex) {
+                for (let j = state.currentActivityIndex + 1; j <= myIndex; j++) {
+                    state.inxis[j].x = state.listDomInfo[j - 1].left - state.listDomInfo[j].left;
+                    state.inxis[j].y = state.listDomInfo[j - 1].top - state.listDomInfo[j].top;
+                }
+                if (state.lastTimeIndex !== null && myIndex < state.lastTimeIndex) {
+
+                    for (let p = myIndex + 1; p <= state.lastTimeIndex; p++) {
+                        state.inxis[p].y = 0;
+                        state.inxis[p].x = 0;
+                    }
+                }
+            } else if (state.currentActivityIndex > myIndex) {
+                for (let j = i; j < state.currentActivityIndex; j++) {
+                    state.inxis[j].x = state.listDomInfo[j + 1].left - state.listDomInfo[j].left;
+                    state.inxis[j].y = state.listDomInfo[j + 1].top - state.listDomInfo[j].top;
+                }
+
+                if (state.lastTimeIndex !== null && myIndex > state.lastTimeIndex) {
+
+                    for (let p = state.lastTimeIndex; p < myIndex; p++) {
+                        state.inxis[p].y = 0;
+                        state.inxis[p].x = 0;
+                    }
+                }
+            } else if (state.currentActivityIndex === myIndex) {
+                for (let p = 0; p < state.inxis.length; p++) {
+                    state.inxis[p].y = 0;
+                    state.inxis[p].x = 0;
+                }
+            };
+
+            // state.lastTimeIndex = myIndex;
+
+            return
+            /* motionState.isWhether = true;
+          
             if (i === state.vacancyIndex) {
                 continue
             }
@@ -261,7 +308,7 @@ function determineLocation() {
 
                 state.vacancyIndex = myIndex
             };
-
+ */
         };
 
     };

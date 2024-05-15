@@ -151,7 +151,7 @@ export default {
             overflow: auto;
 
 
-            &::-webkit-scrollbar{
+            &::-webkit-scrollbar {
                 width: 0px;
             }
         }

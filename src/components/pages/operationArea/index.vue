@@ -16,6 +16,8 @@ import CenterZone from './centerZone.vue';
 import RightZone from './rightZone.vue';
 import mittBus from '/@/utils/mitt'; // 事件总线
 
+import { useRoute, useRouter } from 'vue-router';
+
 
 export default {
 
@@ -113,16 +115,12 @@ export default {
 
         onBeforeMount(() => {
 
-            let data = sessionStorage.getItem('templateData');
-            data = data ? JSON.parse(data) : data;
-            data && externalFillData(data);
-
-
             // 注册事件
             mittBus.on('switchCurrentActive', switchCurrentActive);
             mittBus.on('deleteItem', deleteItem);
             mittBus.on('setItemData', setItemData);
             mittBus.on('addItem', addItem);
+            
         });
 
 
@@ -174,6 +172,7 @@ export default {
 
         // 修改数据
         function setItemData(data = {}) {
+
             const item = getItem();
             if (!item) {
                 return
@@ -261,7 +260,8 @@ export default {
 
 
         function isAllDisabled() {
-            return window.location.href.includes('visualizationOperation');
+            const route = useRoute();
+            return route.path === '/templateSetPage';
         };
 
         return { state, componentName, componentData, setBackColor, externalDataAcquisition, externalFillData, isAllDisabled };

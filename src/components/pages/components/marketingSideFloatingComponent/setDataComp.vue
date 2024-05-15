@@ -1,45 +1,35 @@
 <template>
-    <div class="modifyingInformation marketingFormComponent">
+    <div class="modifyingInformation marketingSideFloatingComponent">
         <div class="item">
-            <p class="title">营销组件: 表单</p>
-            <p class="title_tips">建议将表单组件放置于原生推广页的首屏或第二屏位置，以获得更好的转化效果。</p>
+            <p class="title">营销组件: 侧边浮动</p>
+            <p class="title_tips">固定在页面右侧的矩形按钮。</p>
             <el-tag style="margin: 15px 20px;" type="primary" size="default">支持腾讯广告全广告位</el-tag>
         </div>
 
-
         <div class="item">
-            <p class="title">编辑表单</p>
-            <DragForms :itemData="props.componentData" />
-        </div>
-
-        <div class="item">
-            <p class="title">按钮外观</p>
+            <p class="title">内容设置</p>
             <el-form :model="form" label-width="auto" style="padding: 0px 20px;">
-                <el-form-item label="按钮文案" style="margin-bottom: 6px;">
-                    <el-input v-model="form.buttonText" size="default" placeholder="按钮文案" @input="setFinalData"/>
+                <el-form-item label="转换按钮" style="margin-bottom: 6px;">
+                    <div>
+                        <el-text class="mx-1" size="small" style="display: inline-block; width: 60px;">微信客服</el-text>
+                        <el-text class="changeText" size="small"
+                            style="margin-left: 10px; cursor: pointer;">更改</el-text>
+                    </div>
                 </el-form-item>
-                <el-form-item label="字体色" style="margin-bottom: 6px;">
-                    <el-color-picker v-model="form.color" size="default" @active-change="activeChange('color', $event)"/>
+
+                <el-form-item label="文档内容" style="margin-bottom: 6px;">
+                    <el-input v-model="form.copywriting" style="width: 170px" placeholder="文案内容" size="default" @input="setFinalData"/>
                 </el-form-item>
-                <el-form-item label="边框色" style="margin-bottom: 6px;">
-                    <el-color-picker v-model="form.borderColor" size="default" @active-change="activeChange('borderColor', $event)"/>
+
+
+                <el-form-item label="内容色" style="margin-bottom: 6px;">
+                    <el-color-picker v-model="form.color" size="default"
+                        @active-change="activeChange('color', $event)" />
                 </el-form-item>
+
                 <el-form-item label="背景色" style="margin-bottom: 6px;">
-                    <el-color-picker v-model="form.backgroundColor" size="default" @active-change="activeChange('backgroundColor', $event)"/>
-                </el-form-item>
-            </el-form>
-        </div>
-
-
-        <div class="item">
-            <p class="title">边距</p>
-            <el-form :model="form" label-width="auto" style="padding: 0px 20px;">
-                <el-form-item label="上边距" style="margin-bottom: 6px;">
-                    <el-slider v-model="style.paddingTop" style="padding: 0px 25px;" @input="setFinalData"/>
-                </el-form-item>
-
-                <el-form-item label="下边距" style="margin-bottom: 6px;">
-                    <el-slider v-model="style.paddingBottom" style="padding: 0px 25px;" @input="setFinalData"/>
+                    <el-color-picker v-model="form.backgroundColor" size="default" show-alpha
+                        @active-change="activeChange('backgroundColor', $event)" />
                 </el-form-item>
             </el-form>
         </div>
@@ -47,11 +37,10 @@
 </template>
 
 
-<script setup name="marketingFormComponent">
-import { reactive, onMounted, onUnmounted, ref, defineProps, watch } from 'vue';
-import DragForms from './components/DragForms.vue';
-import mittBus from '/@/utils/mitt'; // 事件总线
 
+<script name="marketingSideFloatingComponent" setup>
+import { reactive, onMounted, onUnmounted, ref, defineProps, watch } from 'vue';
+import mittBus from '/@/utils/mitt'; // 事件总线
 
 const props = defineProps({
     componentData: {
@@ -64,24 +53,19 @@ const props = defineProps({
 });
 
 
-
 const form = reactive({
-    buttonText: props.componentData.buttonText, // 按钮文案
-    color: props.componentData.style.color,  // 字体色
-    borderColor: props.componentData.style.borderColor, // 边框色
-    backgroundColor: props.componentData.style.backgroundColor, // 背景色
-});
-
-const style = reactive({
-    paddingTop: props.componentData.style.paddingTop,
-    paddingBottom: props.componentData.style.paddingBottom
+    copywriting: props.componentData.contentText, // 文案
+    color: props.componentData.style.color,
+    backgroundColor: props.componentData.style.backgroundColor
 });
 
 
-function activeChange(key, color){
+
+// 修改颜色
+function activeChange(key, color) {
     form[key] = color;
     setFinalData();
-}
+};
 
 
 // 修改最终数据
@@ -91,18 +75,14 @@ function setFinalData() {
 
         style: {
             color: form.color,
-            borderColor: form.borderColor,
             backgroundColor: form.backgroundColor,
-            paddingTop: style.paddingTop,
-            paddingBottom: style.paddingBottom
         },
 
-        buttonText: form.buttonText
+        contentText: form.copywriting
     });
-};
+}
 
 </script>
-
 
 
 <style lang="scss" scoped>
@@ -226,13 +206,30 @@ function setFinalData() {
         }
 
 
+        .changeText {
+            padding: 5px;
+            border-radius: 3px;
+            transition: all 0.2s;
+            background-color: transparent;
+
+            &:hover {
+                background-color: #999999;
+                color: #fff;
+            }
+        }
     }
 }
 </style>
 
+
+
 <style lang="scss">
-.marketingFormComponent {
+.marketingSideFloatingComponent {
     .item {
+        .el-form-item__label-wrap {
+            align-items: center;
+        }
+
         .el-form-item__label {
             font-size: 12px;
         }

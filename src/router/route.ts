@@ -65,7 +65,7 @@ export const dynamicRoutes: Array<RouteRecordRaw> = [
 			},
 
 			{
-			    path: '/template',
+				path: '/template',
 				name: 'template',
 				component: () => import('/@/layout/routerView/parent.vue'),
 				redirect: '/template/templateList',
@@ -76,7 +76,7 @@ export const dynamicRoutes: Array<RouteRecordRaw> = [
 					isKeepAlive: true,
 					isAffix: false,
 					isIframe: false,
-					roles: ['admin'],
+					roles: ['admin', 'common'],
 					icon: 'iconfont icon-xitongshezhi',
 				},
 				children: [
@@ -91,30 +91,30 @@ export const dynamicRoutes: Array<RouteRecordRaw> = [
 							isKeepAlive: true,
 							isAffix: false,
 							isIframe: false,
-							roles: ['admin'],
+							roles: ['admin', 'common'],
 							icon: 'iconfont icon-xitongshezhi',
 						},
 					},
 				]
-			}, 
-			
+			},
+
 
 			{    /* 项目 */
-                 path: '/project',
-				 name: 'project',
-				 component: () => import('/@/layout/routerView/parent.vue'),
-				 redirect: '/project/projectList',
-				 meta: {
+				path: '/project',
+				name: 'project',
+				component: () => import('/@/layout/routerView/parent.vue'),
+				redirect: '/project/projectList',
+				meta: {
 					title: 'message.router.project',
 					isLink: '',
 					isHide: false,
 					isKeepAlive: true,
 					isAffix: false,
 					isIframe: false,
-					roles: ['admin'],
+					roles: ['admin', 'common'],
 					icon: 'iconfont icon-xitongshezhi',
-				 },
-				 children: [
+				},
+				children: [
 					{
 						path: '/project/projectList',
 						name: 'projectList',
@@ -126,14 +126,15 @@ export const dynamicRoutes: Array<RouteRecordRaw> = [
 							isKeepAlive: true,
 							isAffix: false,
 							isIframe: false,
-							roles: ['admin'],
+							roles: ['admin', 'common'],
 							icon: 'iconfont icon-xitongshezhi',
-						 },
+						},
 					}
-				 ]
+				]
 			},
 
-			/*{
+
+			{
 				path: '/system',
 				name: 'system',
 				component: () => import('/@/layout/routerView/parent.vue'),
@@ -179,7 +180,7 @@ export const dynamicRoutes: Array<RouteRecordRaw> = [
 							icon: 'ele-ColdDrink',
 						},
 					},
-					{
+					/* {
 						path: '/system/user',
 						name: 'systemUser',
 						component: () => import('/@/views/system/user/index.vue'),
@@ -223,10 +224,12 @@ export const dynamicRoutes: Array<RouteRecordRaw> = [
 							roles: ['admin'],
 							icon: 'ele-SetUp',
 						},
-					},
+					}, */
 				],
 			},
-			{
+			
+			
+			/* {
 				path: '/limits',
 				name: 'limits',
 				component: () => import('/@/layout/routerView/parent.vue'),
@@ -1026,7 +1029,7 @@ export const dynamicRoutes: Array<RouteRecordRaw> = [
 				],
 			},
 			
-			  {
+			{
 				path: '/params',
 				name: 'paramsIndex',
 				component: () => import('/@/layout/routerView/parent.vue'),
@@ -1253,6 +1256,7 @@ export const dynamicRoutes: Array<RouteRecordRaw> = [
 			}, */
 		],
 	},
+	
 ];
 
 /**
@@ -1305,6 +1309,7 @@ export const staticRoutes: Array<RouteRecordRaw> = [
 		component: () => import('/@/views/visualizing/demo1.vue'),
 		meta: {
 			title: 'message.router.visualizingLinkDemo1',
+			roles: ['admin'],
 		},
 	},
 	{
@@ -1313,6 +1318,7 @@ export const staticRoutes: Array<RouteRecordRaw> = [
 		component: () => import('/@/views/visualizing/demo2.vue'),
 		meta: {
 			title: 'message.router.visualizingLinkDemo2',
+			roles: ['admin'],
 		},
 	},
 	{
@@ -1320,15 +1326,38 @@ export const staticRoutes: Array<RouteRecordRaw> = [
 		name: 'visualizationOperation',
 		component: () => import('/@/views/visualizationOperation/index.vue'),
 		meta: {
-			title: 'message.router.visualizationOperation'
+			title: 'message.router.visualizationOperation',
+			isHide: false,
+			isKeepAlive: false,
+			isAffix: false,
+			isIframe: false,
+			roles: ['admin'],
+		}
+	},
+	{
+		path: '/templateSetPage',
+		name: 'templateSetPage',
+		component: () => import('/@/views/templateSetPage/index.vue'),
+		meta: {
+			title: 'message.router.templateSetPage',
+			isHide: false,
+			isKeepAlive: false,
+			isAffix: false,
+			isIframe: false,
+			roles: ['admin', 'common'],
 		}
 	},
 	{
 		path: '/templateCreationPage',
 		name: 'templateCreationPage',
-		component: ()=> import('/@/views/templateCreationPage/index.vue'),
+		component: () => import('/@/views/templateCreationPage/index.vue'),
 		meta: {
-			title: 'message.router.templateCreationPage'
+			title: 'message.router.templateCreationPage',
+			isHide: false,
+			isKeepAlive: false,
+			isAffix: false,
+			isIframe: false,
+			roles: ['admin'],
 		}
-	}
+	},
 ];

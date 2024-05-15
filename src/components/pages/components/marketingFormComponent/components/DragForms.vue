@@ -1,15 +1,16 @@
 <template>
     <div class="dragForms">
         <ul class="dragForms_ul" ref="dragFormsuUlBox">
-            <li class="ul_li" @mousedown="mousedown($event, index)" v-for="item, index in state.list" :key="item.id"
-                :style="{
-                    top: state.lists[index] && state.lists[index].y + 'px',
-                    left: state.lists[index] && state.lists[index].x + 'px'
-                }" :class="{
-                    press: state.cuurentIndex === index || state.loosenIndex === index,
-                    motion: state.cuurentIndex !== index
-                }">
-                <div class="li_Icon" :class="{ press: state.cuurentIndex === index && state.isPress }">
+            <li class="ul_li" v-for="item, index in listData" :key="item.id" :style="{
+                top: state.lists[index] && state.lists[index].y + 'px',
+                left: state.lists[index] && state.lists[index].x + 'px'
+            }" :class="{
+                press: state.cuurentIndex === index && state.isMove,
+                motion: state.cuurentIndex !== index,
+                motionZ: state.loosenIndex === index
+            }">
+                <div class="li_Icon" :class="{ press: state.cuurentIndex === index && state.isPress }"
+                    @mousedown="mousedown($event, index)">
                     <svg width="18" height="18" viewBox="0 0 18 18" fill="#a3a3a3" data-interactive="true"
                         data-icon="draggable" style="margin-top: 0px; margin-right: 8px;">
                         <path
@@ -52,11 +53,28 @@
                         </g>
                     </svg>
                 </div>
-                <el-select v-model="data.value1" :placeholder="item.tips" style="width: 170px;" size="default">
-                    <el-option v-for="item1 in options1" :key="item1.id" :label="item1.label" :value="item1.id" />
+                <el-select v-if="item.type === 'select'" v-model="item.active" :placeholder="item.text"
+                    @change="changeSelect(item, $event)" style="width: 170px;" size="default">
+                    <el-option v-for="item1 in getTypeSelection(item.id)" :key="item1.id" :label="item1.label"
+                        :value="item1.id" />
                 </el-select>
+                <el-input v-else-if="item.type === 'input'" v-model="item.active" style="width: 170px;" size="default"
+                    :placeholder="item.text" />
+
+                <el-text v-if="item.text !== '电话号码'" class="mx-1 location" size="small"
+                    @click="deleteItem(item.id)">删除</el-text>
             </li>
         </ul>
+        <el-dropdown trigger="click" @command="commandChange">
+            <el-button size="default"
+                style="margin-left: 26px; margin-top: 10px;"><el-icon><ele-Plus /></el-icon>添加表单项</el-button>
+            <template #dropdown>
+                <el-dropdown-menu>
+                    <el-dropdown-item :command="item.id" v-for="item in dropdownList" :key="item.id">{{ item.text
+                        }}</el-dropdown-item>
+                </el-dropdown-menu>
+            </template>
+        </el-dropdown>
     </div>
 </template>
 
@@ -65,7 +83,18 @@
 
 <script>
 import { reactive, onMounted, onUnmounted, ref, defineProps, watch } from 'vue';
+import mittBus from '/@/utils/mitt'; // 事件总线
+
 export default {
+
+    props: {
+        itemData: {
+            default() {
+                return {}
+            }
+        }
+    },
+
     setup(props, { emit }) {
 
         const dragFormsuUlBox = ref(null);
@@ -79,53 +108,209 @@ export default {
 
             currentVacancyX: null, // 当前空位坐标x
             currentVacancyY: null, // 当前空位坐标y
-            cuurentIndex: undefined,
+            cuurentIndex: undefined, // 按下的索引
             loosenIndex: undefined,
 
             domInfos: [], // dom的位置信息
-            lists: [], // 
+            lists: [], // dom当前位置信息
 
-            endIndex: null,
-            list: [
+            lastTimeIndex: null, // 上一次的占位索引
+        });
+
+
+        // 列表数据
+        const listData = ref([...props.itemData.forms]);
+
+
+        // 按钮下拉列表项
+        const dropdownList = ref();
+
+
+        const arr = [
+            {
+                id: 1,
+                text: '文本框',
+                type: 'input'
+            },
+            {
+                id: 2,
+                text: '性别',
+                type: 'select'
+            }, {
+                id: 3,
+                text: '国家',
+                type: 'select'
+            },
+            {
+                id: 4,
+                text: '省份',
+                type: 'select'
+            },
+            {
+                id: 5,
+                text: '城市',
+                type: 'select'
+            }, {
+                id: 6,
+                text: '下拉',
+                type: 'select'
+            },
+            {
+                id: 7,
+                text: '二级下拉',
+                type: 'select'
+            },
+            {
+                id: 8,
+                text: '三级下拉',
+                type: 'select'
+            },
+            {
+                id: 9,
+                text: '电话号码',
+                type: 'select'
+            },
+            {
+                id: 10,
+                text: '姓名',
+                type: 'select'
+            }
+        ];
+
+        // 电话类型选项
+        const phoneTypeOptions = reactive({
+            lits: [
                 {
-                    id: 1,
-                    tips: '姓名'
+                    label: '电话号码',
+                    id: 1
                 },
                 {
-                    id: 2,
-                    tips: '性别'
+                    label: '手机号码',
+                    id: 2
                 },
                 {
-                    id: 3,
-                    tips: '身份'
+                    label: '电话',
+                    id: 3
                 },
                 {
-                    id: 4,
-                    tips: '手机号码'
+                    label: '手机',
+                    id: 4
                 }
             ],
-
-
-            lastTimeIndex: null
         });
 
 
-        const data = reactive({
-            value1: ''
+        // 名字类型选项
+        const nameTypeOptions = reactive({
+            lits: [
+                {
+                    label: '姓名',
+                    id: 1
+                },
+                {
+                    label: '名字',
+                    id: 2
+                },
+                {
+                    label: '昵称',
+                    id: 3
+                }
+            ],
         });
 
-        const options1 = ref([
-            {
-                label: '姓名',
+
+        // 国家类型
+        const countryType = reactive({
+            lits: [
+                {
+                    label: '国家',
+                    id: 1
+                },
+                {
+                    label: '国籍',
+                    id: 2
+                }
+            ],
+        });
+
+
+        // 性别类型选项
+        const genderType = reactive({
+            lits: [{
+                label: '性别',
                 id: 1
-            }
-        ]);
+            }]
+        });
+
+
+        // 省份选项
+        const provinceOptions = reactive({
+            lits: [{
+                label: '省份',
+                id : 1
+            }]
+        });
+
+
+        // 城市选项
+        const cityOptions = reactive({
+            lits: [{
+                label: '城市',
+                id : 1
+            }]
+        });
 
 
         onMounted(() => {
-            initDomsInfo();
+            initDomsInfo(); // 初始化dom信息
+            iniDropdownList(); // 初始化下拉列表选项
         });
 
+
+        // 初始化下拉列表选项
+        function iniDropdownList() {
+
+            const ids = listData.value.map((item) => { return item.id });
+            const s = arr.filter((item) => {
+                if (item.id === 7 && (ids.includes(7) || ids.includes(8)) || item.id === 8 && (ids.includes(7) || ids.includes(8))) {
+                    return false;
+                }
+                return !ids.includes(item.id);
+            });
+
+            dropdownList.value = [...s];
+        };
+
+
+        // 点击拉下列表选项时触发 --- 添加项
+        function commandChange(id) {
+            const item = arr.filter((item) => { return item.id == id })[0];
+            const s = getTypeSelection(item.id, item.id === 1 ? 'input' : 'select');
+
+            listData.value.push({
+                ...item,
+                active: s && s.length ? s[0].id : '',
+                tips: s && s.length ? s[0].label : '请输入'
+            });
+
+            iniDropdownList();
+
+            setFinalData();
+            setTimeout(initDomsInfo, 100);
+        };
+
+
+        // 删除表单项
+        function deleteItem(id) {
+
+            const index = listData.value.findIndex((item) => {
+                return item.id == id;
+            });
+            listData.value.splice(index, 1);
+
+            setFinalData();
+            setTimeout(initDomsInfo, 100);
+        };
 
         // 鼠标按下
         function mousedown({ clientX, clientY, target }, index) {
@@ -160,113 +345,107 @@ export default {
             window.removeEventListener('mouseup', mouseup);
 
             state.isPress = false;
+            state.lists[state.cuurentIndex].x = state.currentVacancyX - state.domInfos[state.cuurentIndex].left;
+            state.lists[state.cuurentIndex].y = state.currentVacancyY - state.domInfos[state.cuurentIndex].top;
 
+            const cuurentIndex = state.cuurentIndex;
+            const lastTimeIndex = state.lastTimeIndex;
+
+            state.loosenIndex = state.cuurentIndex;
+            state.cuurentIndex = null;
+            state.pressX = null;
+            state.pressY = null;
+            state.currentVacancyX = 0;
+            state.currentVacancyY = 0;
+            state.lastTimeIndex = null;
+            if (!state.isMove) {
+                return
+            }
             state.isMove = false;
-            state.lists[state.cuurentIndex].x = 0;
-            state.lists[state.cuurentIndex].y = 0;
-            return
-            /*   const item = state.domInfos[state.cuurentIndex];
-  
-              const y = state.currentVacancyY - item.top;
-              const x = state.currentVacancyX - item.left;
-              state.lists[state.cuurentIndex].x = x;
-              state.lists[state.cuurentIndex].y = y;
-  
-              const startIndex = state.cuurentIndex;
-              const endIndex = state.endIndex;
-              state.pressX = 0;
-              state.pressY = 0;
-              state.loosenIndex = state.cuurentIndex;
-              state.cuurentIndex = undefined;
-              state.currentVacancyX = 0;
-              state.currentVacancyY = 0;
-              state.endIndex = null;
-              setTimeout(() => {
-                  state.loosenIndex = undefined;
-                  initDomsInfo();
-  
-                  dataSwappingPositions(startIndex, endIndex)
-              }, 300); */
+
+            setTimeout(() => {
+                state.lists.length = 0;
+                state.loosenIndex = null;
+                dataSwappingPositions(cuurentIndex, lastTimeIndex); // 进行数据调换位置
+                setTimeout(initDomsInfo, 100);
+            }, 250);
+
         };
 
 
-
-        // 调换位置
+        // 标签调换位置
         function swappingPositions() {
             const info = dragFormsuUlBox.value.getBoundingClientRect();
             const cx = state.lists[state.cuurentIndex].x + state.domInfos[state.cuurentIndex].left;
             const cy = state.lists[state.cuurentIndex].y + state.domInfos[state.cuurentIndex].top;
 
-
-
             for (let i = 0; i < state.domInfos.length; i++) {
                 const item = state.domInfos[i];
 
                 if ((cy > item.top) && (cy < item.top + 10) && ((cx + 200) > info.left && cx < (info.left + item.width))) {
-                   
 
-                    const inp = state.lastTimeIndex;
-                    
-                    console.log(state.cuurentIndex, state.lastTimeIndex)
 
                     // 更新目标元素位置
                     if (state.cuurentIndex < i) {
-            
-                        // 目标元素下移
+
+
+                        // 目标元素上移
                         for (let j = state.cuurentIndex + 1; j <= i; j++) {
-                            state.lists[j].y -= item.height;
-                            state.lists[j].y = state.lists[j].y < -1 * item.height ? -1 * item.height : state.lists[j].y;
+
+                            state.lists[j].y = state.domInfos[j - 1].y - state.domInfos[j].y;
+
                         }
 
-                        if(state.lastTimeIndex !== null){
-                        
+
+                        if (state.lastTimeIndex !== null && i < state.lastTimeIndex) {
+
+                            for (let p = i + 1; p <= state.lastTimeIndex; p++) {
+                                state.lists[p].y = 0;
+                            }
                         }
 
                     } else if (state.cuurentIndex > i) {
-                        // 目标元素上移
+                        // 目标元素下移
                         for (let j = i; j < state.cuurentIndex; j++) {
-                            state.lists[j].y += item.height;
-                            state.lists[j].y = state.lists[j].y > item.height ? item.height : state.lists[j].y;
+
+                            state.lists[j].y = state.domInfos[j + 1].y - state.domInfos[j].y;
+                        }
+
+
+                        if (state.lastTimeIndex !== null && i > state.lastTimeIndex) {
+
+                            for (let p = state.lastTimeIndex; p < i; p++) {
+                                state.lists[p].y = 0;
+                            }
+                        }
+                    } else if (state.cuurentIndex === i) {
+                        for (let p = 0; p < state.lists.length; p++) {
+                            state.lists[p].y = 0;
                         }
                     }
 
                     state.currentVacancyY = item.top;
                     state.currentVacancyX = item.left;
                     state.lastTimeIndex = i;
-                    
 
                     break; // 终止循环，因为已经找到了目标位置
                 }
             }
-        }
-
-
+        };
 
 
         // 数据调换位置
-        function dataSwappingPositions(startIndex, endIndex) {
-            if (startIndex === endIndex || endIndex === null) {
+        function dataSwappingPositions(cuurentIndex, lastTimeIndex) {
+            if (cuurentIndex === lastTimeIndex) {
                 return
-            }
+            };
 
-            // 获取当前拖动元素的信息
-            const item = state.list[startIndex];
+            const item = listData.value.splice(cuurentIndex, 1);
+            listData.value.splice(lastTimeIndex, 0, item[0]);
 
-            // 计算要删除的元素索引
-            const index1 = startIndex < endIndex ? endIndex + 1 : endIndex;
-
-            // 将拖动元素插入到新位置
-            state.list.splice(index1, 0, item);
-
-            // 计算要删除的元素索引
-            const index = startIndex < endIndex ? startIndex : startIndex + 1;
-
-            // 从原来位置删除元素
-            state.list.splice(index, 1);
-
-            console.log(state.list)
         };
 
+        // 初始化dom信息
         function initDomsInfo() {
             state.domInfos.length = 0;
             state.lists.length = 0;
@@ -289,7 +468,62 @@ export default {
         };
 
 
-        return { state, data, options1, mousedown, dragFormsuUlBox };
+        // 获取类型选项
+        function getTypeSelection(id) {
+            if (id == 9) {
+                return phoneTypeOptions.lits;
+            } else if (id == 10) {
+                return nameTypeOptions.lits;
+            } else if (id == 2) {
+                return genderType.lits;
+            } else if (id == 3) {
+                return countryType.lits;
+            } else if (id == 5) {
+                return cityOptions.lits;
+            } else if (id == 4) {
+                return provinceOptions.lits;
+            }
+        };
+
+
+        // 修改时触发
+        function changeSelect(item, id) {
+            const s = getTypeSelection(item.id);
+
+            const index = s.findIndex((item1)=>{ return item1.id == id });
+
+            item.tips = s[index].label;
+            
+            setFinalData();
+        };
+
+
+        // 修改最终数据
+        function setFinalData() {
+        
+            mittBus.emit('setItemData', {
+                ...props.itemData,
+
+                style: {
+                    ...props.itemData.style,
+                },
+
+                forms: [...listData.value]
+            });
+        };
+
+        return {
+            state,
+            phoneTypeOptions,
+            mousedown,
+            dragFormsuUlBox,
+            listData,
+            dropdownList,
+            commandChange,
+            deleteItem,
+            getTypeSelection,
+            changeSelect
+        };
     }
 }
 </script>
@@ -318,6 +552,10 @@ export default {
                 transition: all 0.2s;
             }
 
+            &.motionZ {
+                z-index: 2;
+            }
+
             .li_Icon {
                 height: 30px;
                 display: flex;
@@ -327,6 +565,24 @@ export default {
                 &.press {
                     cursor: grabbing;
                 }
+            }
+
+
+            &:not(.press):hover {
+                .location {
+                    display: block;
+                }
+
+            }
+
+
+            .location {
+                position: absolute;
+                cursor: pointer;
+                top: 50%;
+                transform: translateY(-50%);
+                right: 60px;
+                display: none;
             }
         }
     }

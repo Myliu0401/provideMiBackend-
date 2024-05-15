@@ -6,8 +6,14 @@
             <el-form-item label="项目名称" prop="name">
                 <el-input v-model="ruleForm.name" placeholder="项目名称" />
             </el-form-item>
-            <el-form-item label="别名" prop="alias">
-                <el-input v-model="ruleForm.alias" placeholder="用于URL显示" />
+            <el-form-item label="别名" >
+                <el-input v-model="ruleForm.alias" placeholder="用于URL显示" disabled />
+            </el-form-item>
+            <el-form-item label="状态" >
+                <el-switch v-model="ruleForm.status" size="small" active-text="启用" inactive-text="禁用" />
+            </el-form-item>
+            <el-form-item label="备注" >
+                <el-input v-model="ruleForm.remark" placeholder="备注" />
             </el-form-item>
             <el-form-item label="显示方式" prop="display_mode">
                 <el-radio-group v-model="ruleForm.display_mode">
@@ -17,52 +23,57 @@
                 </el-radio-group>
             </el-form-item>
 
-            <el-form-item v-if="ruleForm.display_mode === '1'" label="模板">
-                <el-text class="mx-1" v-if="state.flexTemplateItem" style="margin-right: 10px;">
-                    {{ state.flexTemplateItem.name }}</el-text>
-                <el-text class="mx-1" type="primary" size="default" style="cursor: pointer;"
-                    @click="openTemplateList">选择模板</el-text>
-            </el-form-item>
+            <template v-if="true">
+
+                <el-form-item v-if="ruleForm.display_mode === '1'" label="模板">
+                    <el-text class="mx-1" v-if="state.flexTemplateItem" style="margin-right: 10px;">
+                        {{ state.flexTemplateItem.name }}</el-text>
+                    <el-text class="mx-1" type="primary" size="default" style="cursor: pointer;"
+                        @click="openTemplateList">选择模板</el-text>
+                </el-form-item>
 
 
-            <el-form-item v-if="ruleForm.display_mode === '2'" label="url">
-                <el-input v-model="ruleForm.url" placeholder="url" />
-            </el-form-item>
+                <el-form-item v-if="ruleForm.display_mode === '2'" label="url">
+                    <el-input v-model="ruleForm.url" placeholder="url" />
+                </el-form-item>
 
-            <div v-if="ruleForm.display_mode === '3'" class="icons">
-                <el-icon size="22" :class="{ disabled: ruleForm.rules.length === 1 }"
-                    :color="ruleForm.rules.length === 1 ? '#ccc' : 'black'" @click="removeRule"><ele-Remove /></el-icon>
-                <el-icon size="22" @click="addRule"><ele-CirclePlus /></el-icon>
-            </div>
+                <div v-if="ruleForm.display_mode === '3'" class="icons">
+                    <el-icon size="22" :class="{ disabled: ruleForm.rules.length === 1 }"
+                        :color="ruleForm.rules.length === 1 ? '#ccc' : 'black'"
+                        @click="removeRule"><ele-Remove /></el-icon>
+                    <el-icon size="22" @click="addRule"><ele-CirclePlus /></el-icon>
+                </div>
 
-            <div v-if="ruleForm.display_mode === '3'" style="max-height: 57vh; overflow: auto;">
+                <div v-if="ruleForm.display_mode === '3'" style="max-height: 57vh; overflow: auto;">
 
-                <template v-for="item, index in ruleForm.rules" :key="item.id">
-                    <el-form-item label="地区代码" prop="country">
-                        <el-select v-model="item.country" placeholder="国家" style="width: 240px">
-                            <el-option v-for="item in regionNums" :key="item.value" :label="item.label"
-                                :value="item.value" />
-                        </el-select>
-                    </el-form-item>
-                    <el-form-item label="规则类型" style="margin-bottom: 0px;">
-                        <el-radio-group v-model="item.type" class="ml-1" style="position: relative;  top: -4px;">
-                            <el-radio value="template" size="large">模板</el-radio>
-                            <el-radio value="link" size="large">连接</el-radio>
-                        </el-radio-group>
-                    </el-form-item>
-                    <el-form-item :label="item.type === 'template' ? '模板' : 'url'">
-                        <template v-if="item.type === 'template'">
-                            <el-text class="mx-1" v-if="item.templateItem" style="margin-right: 10px;">{{
-                                item.templateItem.name
-                            }}</el-text>
-                            <el-text class="mx-1" type="primary" size="default" style="cursor: pointer;"
-                                @click="openTemplateList(index)">选择模板</el-text>
-                        </template>
-                        <el-input v-else v-model="item.value" placeholder="url" />
-                    </el-form-item>
-                </template>
+                    <template v-for="item, index in ruleForm.rules" :key="item.id">
+                        <el-form-item label="地区代码" prop="country">
+                            <el-select v-model="item.country" placeholder="国家" style="width: 240px">
+                                <el-option v-for="item in regionNums" :key="item.value" :label="item.label"
+                                    :value="item.value" />
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="规则类型" style="margin-bottom: 0px;">
+                            <el-radio-group v-model="item.type" class="ml-1" style="position: relative;  top: -4px;">
+                                <el-radio value="template" size="large">模板</el-radio>
+                                <el-radio value="link" size="large">连接</el-radio>
+                            </el-radio-group>
+                        </el-form-item>
+                        <el-form-item :label="item.type === 'template' ? '模板' : 'url'">
+                            <template v-if="item.type === 'template'">
+                                <el-text class="mx-1" v-if="item.templateItem" style="margin-right: 10px;">{{
+                                    item.templateItem.name
+                                }}</el-text>
+                                <el-text class="mx-1" type="primary" size="default" style="cursor: pointer;"
+                                    @click="openTemplateList(index)">选择模板</el-text>
+                            </template>
+                            <el-input v-else v-model="item.value" placeholder="url" />
+                        </el-form-item>
+                    </template>
 
-            </div>
+                </div>
+
+            </template>
         </el-form>
 
         <div class="buttons" style="position: absolute; bottom: 5%; right: 11%;">
@@ -116,7 +127,8 @@ export default {
             display_mode: '1', // 显示方式
             url: '',
             template_id: '',
-
+            status: 2, // 状态
+            remark: '', // 备注
             rules: [{
                 country: '', // 地区代码
                 type: 'template', // 规则类型
@@ -142,6 +154,8 @@ export default {
             ruleForm.name = item.name;
             ruleForm.alias = item.alias;
             ruleForm.display_mode = display_modes[item.display_mode];
+            ruleForm.status = item.status === 1 ? true : false;
+            ruleForm.remark = item.remark;
             project.value = item;
         };
 
@@ -236,7 +250,9 @@ export default {
                 type: 1,
                 name: ruleForm.name,
                 alias: ruleForm.alias,
+                status: ruleForm.status ? 1 : 2,
                 display_mode: display_mode[ruleForm.display_mode],
+                remark: ruleForm.remark,
                 template_id: ruleForm.display_mode == 1 ? state.flexTemplateItem ? state.flexTemplateItem.id : undefined : undefined,
                 url: ruleForm.display_mode == 2 ? ruleForm.url : undefined,
                 rules: ruleForm.display_mode !== 3 ? undefined : ruleForm.rules.map((item) => {

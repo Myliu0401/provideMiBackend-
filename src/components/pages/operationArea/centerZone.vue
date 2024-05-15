@@ -13,7 +13,7 @@
                 </div>
 
                 <CutSleeveVue v-for="item in page.components" :key="item.id" :activeId="activeId" :id="item.id"
-                    :disabled="isAllDisabled">
+                    :disabled="isAllDisabled" :componentName="item.componentName">
                     <component :is="item.componentName" :itemData="item.data"></component>
                 </CutSleeveVue>
             </div>
@@ -41,6 +41,7 @@ import ConvJumpLinkComponent from '../components/convJumpLinkComponent/index.vue
 import CutSleeveVue from '../components/cutSleeve.vue';
 import BasisBusinessCardComponent from '../components/basisBusinessCardComponent/index.vue';
 import MarketingFormComponent from '../components/marketingFormComponent/index.vue';
+import MarketingSideFloatingComponent from '../components/marketingSideFloatingComponent/index.vue';
 import H5model from '/@/components/H5model/index.vue';
 import mittBus from '/@/utils/mitt'; // 事件总线
 
@@ -57,7 +58,8 @@ export default {
         ConvJumpLinkComponent, 
         CutSleeveVue, 
         BasisBusinessCardComponent,
-        MarketingFormComponent
+        MarketingFormComponent,
+        MarketingSideFloatingComponent
     },
 
     props: {

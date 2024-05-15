@@ -1,0 +1,22 @@
+
+
+.basisCarousel{
+    overflow: hidden;
+    position: relative;
+
+
+    .swiper-pagination{
+        bottom: 2%;
+        left: 50%;
+        transform: translateX(-50%);
+
+        .swiper-pagination-bullet{
+            margin: 0px 3px;
+
+
+            &.swiper-pagination-bullet-active{
+                background-color: #494343;
+            }
+        }
+    }
+}

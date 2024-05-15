@@ -38,8 +38,9 @@ export const router = createRouter({
 	 * 2、backEnd.ts(后端控制路由)、frontEnd.ts(前端控制路由) 中也需要加 notFoundAndNoPower 404、401 界面。
 	 *    防止 404、401 不在 layout 布局中，不设置的话，404、401 界面将全屏显示
 	 */
-	routes: [...notFoundAndNoPower, ...staticRoutes],
+	routes: [...notFoundAndNoPower, staticRoutes[0]],
 });
+
 
 /**
  * 路由多级嵌套数组处理成一维数组
@@ -47,7 +48,7 @@ export const router = createRouter({
  * @returns 返回处理后的一维路由菜单数组
  */
 export function formatFlatteningRoutes(arr: any) {
-	if (arr.length <= 0) return false;
+	if (arr.length <= 0){ return false };
 	for (let i = 0; i < arr.length; i++) {
 		if (arr[i].children) {
 			arr = arr.slice(0, i + 1).concat(arr[i].children, arr.slice(i + 1));
@@ -64,7 +65,7 @@ export function formatFlatteningRoutes(arr: any) {
  * @returns 返回将一维数组重新处理成 `定义动态路由（dynamicRoutes）` 的格式
  */
 export function formatTwoStageRoutes(arr: any) {
-	if (arr.length <= 0) return false;
+	if (arr.length <= 0) { return false; }
 	const newArr: any = [];
 	const cacheList: Array<string> = [];
 	arr.forEach((v: any) => {
@@ -87,6 +88,7 @@ export function formatTwoStageRoutes(arr: any) {
 			}
 		}
 	});
+
 	return newArr;
 }
 
@@ -98,16 +100,19 @@ router.beforeEach(async (to, from, next) => {
 	} 
 	const token = Session.get('token');
 	
+
+	// 是否是登录页
 	if (to.path === '/login' && !token) {
 		next();
 		NProgress.done();
 	} else {
 		
+		// 没有令牌
 		if (!token) {
 			next(`/login?redirect=${to.path}&params=${JSON.stringify(to.query ? to.query : to.params)}`);
 			Session.clear();
 			NProgress.done();
-		} else if (token && to.path === '/login') {
+		} else if (token && to.path === '/login') { // 有令牌并且是登录页
 			next('/home');
 			NProgress.done();
 		} else {
@@ -122,6 +127,7 @@ router.beforeEach(async (to, from, next) => {
 					// to.query 防止页面刷新时，普通路由带参数时，参数丢失。动态路由（xxx/:id/:name"）isDynamic 无需处理
 					next({ path: to.path, query: to.query });
 				} else {
+
 					// https://gitee.com/lyt-top/vue-next-admin/issues/I5F1HP
 					await initFrontEndControlRoutes();
 					next({ path: to.path, query: to.query });

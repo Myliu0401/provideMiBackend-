@@ -3,23 +3,24 @@
         <div v-for="item, index in state.lists" class="cardBox" :class="{ press: state.currentActivityIndex === index }"
             :key="item.id">
             <div class="cardItem" :class="{
-                motion: state.currentActivityIndex == index ? !state.isPress : motionState.isPressMotion,
+                motion: state.currentActivityIndex !== index,
                 cancel: item.src,
                 active: state.activeId === item.id
             }" @click.stop="triggerChangeEvent(item, index, false)" @mousedown="mousedown(index, $event)" :style="{
-                top: getCoBol(index) ? (state.currentY + 'px') : null,
-                left: getCoBol(index) ? (state.currentX + 'px') : null,
-                transform: handleTransform(index)
+                top: state.infoLists[index] && (state.infoLists[index].y + 'px'),
+                left: state.infoLists[index] && (state.infoLists[index].x + 'px')
             }">
 
-                <svg v-if="!item.src" class="icon" width="18" height="18" viewBox="0 0 18 18" data-interactive="false"
-                    data-icon="add">
+                <svg v-if="!item.src && !item.loading" class="icon" width="18" height="18" viewBox="0 0 18 18"
+                    data-interactive="false" data-icon="add">
                     <path
                         d="M8.25 14.5C8.25 14.7761 8.47386 15 8.75 15H9.25C9.52614 15 9.75 14.7761 9.75 14.5V9.75H14.5C14.7761 9.75 15 9.52614 15 9.25V8.75C15 8.47386 14.7761 8.25 14.5 8.25H9.75V3.5C9.75 3.22386 9.52614 3 9.25 3H8.75C8.47386 3 8.25 3.22386 8.25 3.5V8.25H3.5C3.22386 8.25 3 8.47386 3 8.75V9.25C3 9.52614 3.22386 9.75 3.5 9.75H8.25V14.5Z"
                         fill-rule="evenodd"></path>
                 </svg>
 
-                <img v-else :src="item.src" class="cardItem_img" />
+                <img v-if="item.src" :src="item.src" class="cardItem_img" />
+
+                <el-icon v-if="item.loading" class="loading" size="20"><ele-Loading /></el-icon>
 
 
                 <div v-if="item.src" class="fixed" @click.stop="triggerChangeEvent(item, index, true)">
@@ -37,7 +38,7 @@
     </div>
 
     <teleport to="#app">
-        <input type="file" name="image" id="imageInput" ref="imageInput" accept="image/*" @change="uploadImages">
+        <input type="file" name="image" id="imageInput" ref="imageInput" accept="image/*" @change="myUploadImages">
     </teleport>
 </template>
 
@@ -45,6 +46,8 @@
 
 <script setup name="CardDragArea">
 import { reactive, onBeforeMount, onMounted, onUnmounted, ref, defineProps, watch } from 'vue';
+import { uploadImages } from '/@/api/singlePage/index.js';
+import { ElMessage, ElMessageBox } from 'element-plus';
 import mittBus from '/@/utils/mitt'; // 事件总线
 
 const props = defineProps({
@@ -69,32 +72,22 @@ const state = reactive({
     isPress: false, // 鼠标按下
     pressX: null, // 按下的X坐标
     pressY: null, // 抬起的Y坐标
-    lastTimeX: 0, // 上一次的X坐标
-    lastTimeY: 0, // 上一次的Y坐标
     currentX: null, // 当前的X坐标
     currentY: null, // 当前的Y坐标
     currentActivityIndex: null, // 当前活动的索引
     listDomInfo: [], // 列表dom信息
-    lists: [],
-    surplusX: 0, // 剩余的X距离
-    surplusY: 0, // 剩余的Y距离
+    lists: [], // 图片列表数量
     distancePerPosition: {}, // 每个位置的距离
-    vacancyIndex: null, // 空位的索引
+
     isMove: false, // 是否有移动
     activeId: props.currentId, // 当前选中的id
+
+
+    infoLists: [], // dom位置
+    lastTimeIndex: null
 });
 
 
-// 每一项的宽高
-const cardItemInfo = reactive({
-    width: 73,
-    height: 73
-});
-
-const motionState = reactive({
-    isWhether: false, // 是否开启运动
-    isPressMotion: false,
-});
 
 onBeforeMount(() => {
     setLists();
@@ -121,7 +114,7 @@ function setLists() {
     } else {
         for (let i = state.lists.length; i < props.listNum; i++) {
             const item = props.carousel[i];
-            state.lists.push(item || { id: state.lists.length + 1 });
+            state.lists.push(item || { id: Math.random().toString(36).slice(3), loading: false });
         }
     }
 
@@ -133,13 +126,8 @@ function mousedown(index, e) {
 
     state.pressX = e.clientX;
     state.pressY = e.clientY;
-    state.surplusY = state.pressY - state.listDomInfo[index].top;
-    state.surplusX = state.pressX - state.listDomInfo[index].left;
     state.isPress = true;
     state.currentActivityIndex = index;
-    state.vacancyIndex = index;
-    motionState.isPressMotion = true;
-    state.isMove = false;
     window.addEventListener('mousemove', mousemove);
     window.addEventListener('mouseup', mouseup);
 
@@ -148,8 +136,13 @@ function mousedown(index, e) {
 // 鼠标移动事件
 function mousemove(e) {
 
-    state.currentX = (e.clientX - state.pressX) + state.lastTimeX;
-    state.currentY = (e.clientY - state.pressY) + state.lastTimeY;
+    if (!state.isPress) {
+        return
+    };
+    state.infoLists[state.currentActivityIndex].x = e.clientX - state.pressX;
+    state.infoLists[state.currentActivityIndex].y = e.clientY - state.pressY;
+    state.currentX = e.clientX;
+    state.currentY = e.clientY;
     state.isMove = true;
     determineLocation();
 };
@@ -157,185 +150,118 @@ function mousemove(e) {
 // 鼠标抬起事件
 function mouseup(event) {
 
-    state.lastTimeX = 0; //state.currentX;
-    state.lastTimeY = 0; //state.currentY;
+    const startIndex = state.currentActivityIndex;
+    const endIndex = state.lastTimeIndex;
+
     state.isPress = false;
+    state.pressX = 0;
+    state.pressY = 0;
+    state.currentActivityIndex = null;
+    state.lastTimeIndex = null;
+    if (!state.isMove) {
+        return
+    }
     window.removeEventListener('mousemove', mousemove);
     window.removeEventListener('mouseup', mouseup);
+    state.infoLists[startIndex].x = state.listDomInfo[endIndex].x - state.listDomInfo[startIndex].x;
+    state.infoLists[startIndex].y = state.listDomInfo[endIndex].y - state.listDomInfo[startIndex].y;
+    setTimeout(() => {
+        state.isMove = false;
+        state.infoLists.length = 0;
+        exchangeData(startIndex, endIndex);
+        setTimeout(initListDomInfo, 100);
+    }, 300);
 
 
-    if (!motionState.isWhether) {
-        state.currentX = 0;
-        state.currentY = 0;
-    } else {
-        const left = state.listDomInfo[state.vacancyIndex].x - state.listDomInfo[state.currentActivityIndex].x;
-        const top = state.listDomInfo[state.vacancyIndex].y - state.listDomInfo[state.currentActivityIndex].y;
-        state.currentX = left;
-        state.currentY = top;
-    };
-
-    setTimeout(endEvent, 300);
-
-};
-
-// 获取对应的数据情况
-function getCoBol(index) {
-
-    if (index != state.currentActivityIndex) {
-
-        return false;
-    };
-
-    return true;
 };
 
 
 // 初始化获取列表dom信息
 function initListDomInfo() {
     state.listDomInfo.length = 0;
+    state.infoLists.length = 0;
     Array.from(cardDragArea.value.children).forEach((dom) => {
         state.listDomInfo.push(dom.firstChild.getBoundingClientRect());
+        state.infoLists.push({
+            x: 0,
+            y: 0
+        });
     });
-
-    state.lists.forEach((item) => { state.distancePerPosition[item.id] = { x: 0, y: 0 } });
-
-    window.aa = state.listDomInfo;
-    window.bb = state.distancePerPosition;
 };
 
 
 // 判断位置
 function determineLocation() {
 
-    const top = state.listDomInfo[state.currentActivityIndex].top;
-    const left = state.listDomInfo[state.currentActivityIndex].left;
-
-    const myTop = top + state.currentY;
-    const myLeft = left + state.currentX;
-    const myTop1 = top + cardItemInfo.height;
-    const myLeft1 = left + cardItemInfo.width;
-
-    const boxInfo = cardDragArea.value.getBoundingClientRect();
-
-    let lock = false;
-
-    if (myTop < boxInfo.top + boxInfo.height && myTop > boxInfo.top && myLeft < boxInfo.left + boxInfo.width && myLeft > boxInfo.left) {
-        lock = true;
-    }
+    const myTop = state.currentY;
+    const myLeft = state.currentX;
 
 
     for (let i = 0; i < state.listDomInfo.length; i++) {
         const item = state.listDomInfo[i];
-        const heightTop = item.top + cardItemInfo.height;
-        const widthLeft = item.left + cardItemInfo.width;
+        const heightTop = item.top + item.height;
+        const widthLeft = item.left + item.width;
 
+        if (myLeft < widthLeft && myLeft > item.left && myTop < heightTop && myTop > item.top) {
 
-        if (((myLeft + state.surplusX) < widthLeft) && ((myLeft + state.surplusX) > item.left) && ((myTop + state.surplusY) < heightTop) && (myTop + state.surplusY > item.top)) {
-            const bol = widthLeft - (myLeft + state.surplusX) <= cardItemInfo.width / 2;
-
-            const myIndex = state.currentActivityIndex > i ? bol ? i + 1 : i : bol ? i : i - 1;
-            motionState.isWhether = true;
-
-            if (i === state.vacancyIndex) {
-                continue
+            if (state.currentActivityIndex < i) {
+                for (let j = state.currentActivityIndex + 1; j <= i; j++) {
+                    state.infoLists[j].y = state.listDomInfo[j - 1].top - state.listDomInfo[j].top;
+                    state.infoLists[j].x = state.listDomInfo[j - 1].left - state.listDomInfo[j].left;
+                }
+                if (state.lastTimeIndex !== null && state.lastTimeIndex > i) {
+                    for (let j = i + 1; j <= state.lastTimeIndex; j++) {
+                        state.infoLists[j].y = 0;
+                        state.infoLists[j].x = 0;
+                    }
+                }
+            } else if (state.currentActivityIndex > i) {
+                for (let j = i; j < state.currentActivityIndex; j++) {
+                    state.infoLists[j].y = state.listDomInfo[j + 1].top - state.listDomInfo[j].top;
+                    state.infoLists[j].x = state.listDomInfo[j + 1].left - state.listDomInfo[j].left;
+                }
+                if (state.lastTimeIndex !== null && state.lastTimeIndex < i) {
+                    for (let j = state.lastTimeIndex; j <= i; j++) {
+                        state.infoLists[j].y = 0;
+                        state.infoLists[j].x = 0;
+                    }
+                }
+            } else if (state.currentActivityIndex === i) {
+                for (let j = 0; j < state.infoLists.length; j++) {
+                    if (j !== state.currentActivityIndex) {
+                        state.infoLists[j].y = 0;
+                        state.infoLists[j].x = 0;
+                    }
+                }
             }
 
-            if (myIndex < state.vacancyIndex) {
-                for (let l = myIndex; l < state.vacancyIndex; l++) {
-                    const item1 = state.distancePerPosition[state.lists[l].id];
-                    const x = state.listDomInfo[l + 1].left - state.listDomInfo[l].left;
-                    const y = state.listDomInfo[l + 1].top - state.listDomInfo[l].top;
-                    item1.x = x;
-                    item1.y = y;
-                }
-                state.vacancyIndex = myIndex
+            state.lastTimeIndex = i;
 
-            } else if (myIndex > state.vacancyIndex) {
-                for (let l = state.vacancyIndex + 1; l < myIndex + 1; l++) {
-                    const item1 = state.distancePerPosition[state.lists[l].id];
-                    const x = state.listDomInfo[l - 1].left - state.listDomInfo[l].left;
-                    const y = state.listDomInfo[l - 1].top - state.listDomInfo[l].top;
-                    item1.x = x;
-                    item1.y = y;
-                }
-
-                state.vacancyIndex = myIndex
-            };
-
-        };
-
-    };
-
-    if (true) {
-        return
-    }
-
-    /* if (myTop < top - cardItemInfo.height || myTop > myTop1 || myLeft < left - cardItemInfo.width || myLeft > myLeft1) {
-        motionState.isWhether = true;
-        state.vacancyIndex = 0;
-        for (let i = 0; i < state.currentActivityIndex; i++) {
-            const itme = state.distancePerPosition[state.lists[i].id];
-
-            const x = state.listDomInfo[i + 1].x - state.listDomInfo[i].x;
-            const y = state.listDomInfo[i + 1].y - state.listDomInfo[i].y;
-
-            itme.x = x;
-            itme.y = y;
+            return;
         }
-    }; */
-};
 
-// 处理对应Transform的值
-function handleTransform(index) {
-
-    if (!motionState.isWhether) {
-        return null;
     };
 
 
-    return `translate(${state.distancePerPosition[state.lists[index].id].x}px, ${state.distancePerPosition[state.lists[index].id].y}px)`;
 
 
 };
 
-// 结束时触发
-function endEvent() {
 
-    if (motionState.isWhether) {
-
-        // 获取当前拖动元素的信息
-        const item = state.lists[state.currentActivityIndex];
-
-        // 计算要删除的元素索引
-        const index1 = state.currentActivityIndex < state.vacancyIndex ? state.vacancyIndex + 1 : state.vacancyIndex;
-
-        // 将拖动元素插入到新位置
-        state.lists.splice(index1, 0, item);
-
-        // 计算要删除的元素索引
-        const index = state.currentActivityIndex < state.vacancyIndex ? state.currentActivityIndex : state.currentActivityIndex + 1;
-
-        // 从原来位置删除元素
-        state.lists.splice(index, 1);
-
-
-
+// 调换数据
+function exchangeData(startIndex, endIndex) {
+    if (startIndex === endIndex) {
+        return
     };
 
-    state.lists.forEach((item) => { state.distancePerPosition[item.id] = { x: 0, y: 0 } });
-
-    state.currentActivityIndex = undefined;
-    state.currentX = 0;
-    state.currentY = 0;
-    motionState.isWhether = false;
-    motionState.isPressMotion = false;
-    state.vacancyIndex = null;
-    setData();
+    const item = state.lists.splice(startIndex, 1);
+    state.lists.splice(endIndex, 0, item[0]);
 };
 
 
 // 触发change事件
 function triggerChangeEvent(item, index, force) {
+
 
     // 判断是否选中
     if (state.lists[index].src && !state.isMove && !force) {
@@ -344,6 +270,10 @@ function triggerChangeEvent(item, index, force) {
         setData();
         return
     } else if ((!state.lists[index].src && !state.isMove) || force) { // 判断是否是上传图片
+
+        if (state.lists[index].loading) {
+            return
+        }
 
         imageInput.value.click();
         triggerChangeEvent.index = index; // 当前索引
@@ -354,17 +284,30 @@ function triggerChangeEvent(item, index, force) {
 };
 
 // 上传图片
-function uploadImages() {
+async function myUploadImages() {
 
     var formData = new FormData();
     var fileInput = imageInput.value;
     var file = fileInput.files[0];
-    formData.append('image', file);
+    formData.append('file', file);
+    formData.append('path', 'image');
 
     // 获取临时的URL
-    var imageURL = URL.createObjectURL(file);
-
-    state.lists[triggerChangeEvent.index].src = imageURL;
+    //var imageURL = URL.createObjectURL(file);
+    let res = null
+    state.lists[triggerChangeEvent.index].loading = true;
+    try {
+        res = await uploadImages(formData);
+    } catch (err) {
+        state.lists[triggerChangeEvent.index].loading = false;
+        /* ElMessage({
+            message: err.response.data.message,
+            type: 'warning',
+        }); */
+        return
+    }
+    state.lists[triggerChangeEvent.index].loading = false;
+    state.lists[triggerChangeEvent.index].src = res.data.url;
     state.activeId = triggerChangeEvent.id;
 
     setData();
@@ -394,6 +337,13 @@ function setData() {
     padding: 4px;
     border-radius: 6px;
     box-shadow: 0 0 0 1px rgba(223, 223, 223, 0.45);
+    -webkit-user-select: none;
+    /* Chrome, Safari, Opera */
+    -moz-user-select: none;
+    /* Firefox */
+    -ms-user-select: none;
+    /* Internet Explorer/Edge */
+    user-select: none;
 
     .cardBox {
         height: 83px;
@@ -434,6 +384,13 @@ function setData() {
 
             &.motion {
                 transition: all 0.3s;
+            }
+
+
+            .loading {
+                position: absolute;
+
+                animation: rotate360 2s linear infinite;
             }
 
 
@@ -519,5 +476,16 @@ function setData() {
 
 #imageInput {
     display: none;
+}
+
+
+@keyframes rotate360 {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
 }
 </style>

@@ -51,9 +51,9 @@ export function setProject(data = {}) {
 
 
 // 修改模板
-export function setTemplate(data = {}){
+export function setTemplate(data = {}, id){
     return request({
-        url: `/api/single/templates/${data.id}`,
+        url: `/api/single/templates/${id}`,
         method: 'put',
         data,
     });
@@ -73,6 +73,60 @@ export function uploadImages(data = {}){
 };
 
 
+// 登录
+export function login(data = {}){
+    return request({
+        url: `/api/core/login`,
+        method: 'post',
+        data,
+    });
+};
+
+
+// 添加用户
+export function addUser(data = {}){
+    return request({
+        url: `/api/core/users`,
+        method: 'post',
+        data,
+    });
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // 拼接参数
 function splicingParameters(para = {}) {
     let canshu = '?';
@@ -82,5 +136,7 @@ function splicingParameters(para = {}) {
 
     return canshu.length === 1 ? '' : canshu.slice(0, -1);
 };
+
+
 
 

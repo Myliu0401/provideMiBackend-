@@ -1,5 +1,5 @@
 <template>
-    <el-dialog title="填写模板信息" v-model="state.show" :close-on-click-modal="false" width="50%" :before-close="closePopup">
+    <el-dialog title="修改模板信息" v-model="state.show" :close-on-click-modal="false" width="50%" :before-close="closePopup">
         <el-form ref="ruleFormRef" style="max-width: 500px" :model="ruleForm" :rules="rules" label-width="auto"
             class="demo-ruleForm" :size="formSize" status-icon>
             <el-form-item label="模板名称" prop="name">
@@ -28,7 +28,7 @@
         <template #footer>
             <div class="dialog-footer">
                 <el-button @click="closePopup" size="default">取消</el-button>
-                <el-button type="primary" @click="myCreateTemplate" size="default" :loading="state.loading">
+                <el-button type="primary" @click="mySetTemplate" size="default" :loading="state.loading">
                     {{ state.loading ? '上传中' : state.title }}
                 </el-button>
             </div>
@@ -77,8 +77,13 @@ export default {
 
 
         // 打开弹窗
-        function openPopup() {
+        function openPopup(templateData, info) {
             state.show = true;
+            ruleForm.params = JSON.stringify(templateData);
+            ruleForm.name = info.name;
+            ruleForm.img = info.img;
+            state.title = info.name ? '修改' : '创建';
+            state.id = info.id;
         };
 
         // 关闭弹窗
@@ -113,7 +118,7 @@ export default {
                 res = await uploadImages(formData);
             } catch (err) {
                 state.imageUpload = false;
-
+             
                 return
             };
             state.imageUpload = false;
@@ -144,14 +149,15 @@ export default {
         };
 
 
-        // 创建模板
-        async function myCreateTemplate() {
+        
+        // 修改模板
+        async function mySetTemplate() {
             if (validate()) {
                 return
             }
             await ruleFormRef.value.validate();
             await ElMessageBox.confirm(
-                '你是否确定创建该模板',
+                '你是否确定修改该模板',
                 '提示',
                 {
                     confirmButtonText: '确定',
@@ -159,30 +165,28 @@ export default {
                     type: 'warning',
                 }
             );
-
             state.loading = true;
-            await createTemplate({
+            await setTemplate({
                 type: 1,
                 name: ruleForm.name,
                 img: ruleForm.img,
                 params: JSON.parse(ruleForm.params)
-            });
+            }, state.id);
             state.loading = false;
 
             ElMessage({
-                message: '模板创建成功',
+                message: '模板修改成功',
                 type: 'success',
             });
 
             emit('complete');
-
-
         };
 
 
-      
 
-        return { state, openPopup, closePopup, ruleFormRef, formSize, ruleForm, rules, triggerChange, myUploadImages, imageInput, deleteImg, myCreateTemplate }
+
+
+        return { state, openPopup, closePopup, ruleFormRef, formSize, ruleForm, rules, triggerChange, myUploadImages, imageInput, deleteImg, mySetTemplate }
 
     }
 }

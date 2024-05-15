@@ -1,7 +1,7 @@
 import { RouteRecordRaw } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { formatTwoStageRoutes, formatFlatteningRoutes, router } from '/@/router/index';
-import { dynamicRoutes, notFoundAndNoPower } from '/@/router/route';
+import { dynamicRoutes, notFoundAndNoPower, staticRoutes } from '/@/router/route';
 import pinia from '/@/stores/index';
 import { Session } from '/@/utils/storage';
 import { useUserInfo } from '/@/stores/userInfo';
@@ -67,11 +67,19 @@ export async function frontEndsResetRoute() {
  */
 export function setFilterRouteEnd() {
 	let filterRouteEnd: any = formatTwoStageRoutes(formatFlatteningRoutes(dynamicRoutes));
+
 	// notFoundAndNoPower 防止 404、401 不在 layout 布局中，不设置的话，404、401 界面将全屏显示
 	// 关联问题 No match found for location with path 'xxx'
 	filterRouteEnd[0].children = [...setFilterRoute(filterRouteEnd[0].children), ...notFoundAndNoPower];
+
+    // 添加静态路由权限
+	const s = setFilterRoute(staticRoutes.slice(1));
+	for(let i = 0; i < s.length; i++){
+		filterRouteEnd.push(s[i])
+	}
+
 	return filterRouteEnd;
-}
+};
 
 /**
  * 获取当前用户权限标识去比对路由表（未处理成多级嵌套路由）

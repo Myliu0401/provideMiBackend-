@@ -69,13 +69,14 @@ import BasisTextIcon from './components/BasisTextIcon.vue';
 import ConvJumpLinkIocn from './components/ConvJumpLinkIocn.vue';
 import BasisBusinessCardIcon from './components/BasisBusinessCardIcon.vue';
 import MarketingFormIcon from './components/MarketingFormIcon.vue';
+import MarketingSideFloatingIcon from './components/MarketingSideFloatingIcon.vue';
 import mittBus from '/@/utils/mitt'; // 事件总线
 
 
 
 export default {
 
-    components: { TopImgIcon, TopCarouselIcon, BasisImgIcon, BasisCarouselIcon, BasisTextIcon, ConvJumpLinkIocn, BasisBusinessCardIcon, MarketingFormIcon },
+    components: { TopImgIcon, TopCarouselIcon, BasisImgIcon, BasisCarouselIcon, BasisTextIcon, ConvJumpLinkIocn, BasisBusinessCardIcon, MarketingFormIcon, MarketingSideFloatingIcon },
 
     props: {
 
@@ -121,7 +122,10 @@ export default {
                             componentName: 'topCarouselComponent',
                             id: Math.random().toString(36).slice(3),
                             data: {
-                                carousel: [{ id: 1 }, { id: 2 }, { id: 3 }],
+                                carousel: [
+                                    { id: Math.random().toString(36).slice(3), loading: false }, 
+                                    { id: Math.random().toString(36).slice(3), loading: false }, 
+                                    { id: Math.random().toString(36).slice(3), loading: false }],
                                 currentId: null, // 当前选中的id
                             }
 
@@ -146,8 +150,8 @@ export default {
                             data: {
                                 imgSrc: '',
                                 style: {
-                                    marginTop: 0,
-                                    marginBottom: 0
+                                    paddingTop: 0,
+                                    paddingBottom: 0
                                 }
                             }
 
@@ -163,7 +167,9 @@ export default {
                             componentName: 'basisCarouselComponent',
                             id: Math.random().toString(36).slice(3),
                             data: {
-                                carousel: [{ id: 1 }, { id: 2 }, { id: 3 }],
+                                carousel: [{ id: Math.random().toString(36).slice(3), loading: false }, 
+                                    { id: Math.random().toString(36).slice(3), loading: false }, 
+                                    { id: Math.random().toString(36).slice(3), loading: false }],
                                 currentId: null, // 当前选中的id
                             }
 
@@ -273,10 +279,45 @@ export default {
                             data: {
                                 style: {
                                     paddingTop: 17,
-                                    paddingBottom: 17
-                                }
+                                    paddingBottom: 17,
+                                    color: '#fff',
+                                    borderColor: '#07C160',
+                                    backgroundColor: '#07C160'
+                                },
+
+                                // 表单列表
+                                forms: [
+                                    {
+                                        id: 9,
+                                        text: '电话号码',
+                                        active: 1,
+                                        type: 'select',
+                                        tips: '电话号码'
+                                    }
+                                ], 
+
+                                buttonText: '提交表单', // 按钮文案
                             }
                         }
+                    }
+                },
+                {
+                    id: Math.random().toString(36).slice(3),
+                    name: 'MarketingSideFloatingIcon',
+                    text: '侧边浮动',
+                    createRawData(){
+                         return {
+                            componentName: 'marketingSideFloatingComponent',
+                            id: Math.random().toString(36).slice(3),
+                            data: {
+                                contentText: '微信客服',
+                                type: 1, // 按钮类型
+                                style: {
+                                    color: 'rgb(82, 82, 82)',
+                                    backgroundColor: 'rgba(233, 233, 233, 0.8)'
+                                }
+                            }
+                         }
                     }
                 }
             ]

@@ -51,16 +51,26 @@
 
 
 <script setup name="topImgComponent">
-import { reactive, onMounted, onUnmounted, ref } from 'vue';
+import { reactive, onMounted, onUnmounted, ref, defineProps } from 'vue';
 import { uploadImages } from '/@/api/singlePage/index.js';
+import mittBus from '/@/utils/mitt'; // 事件总线
 
+const props = defineProps({
+    componentData: {
+        default() {
+            return {
+
+            }
+        }
+    }
+});
 
 const imageInput = ref(null);
 
 const state = reactive({
     current: null,
     loading: false, // 是否上传中
-    src: '', // 图片地址
+    src: props.componentData.imgSrc, // 图片地址
 });
 
 
@@ -81,10 +91,17 @@ async function myUploadImages() {
     formData.append('path', 'image');
 
     state.loading = true;
-    const res = await uploadImages(formData);
+    let res = null;
+    try{
+        res = await uploadImages(formData);
+    }catch(err){
+        state.loading = false;
+        return
+    }
     state.loading = false;
 
     state.src = res.data.url;
+    setFinalData();
 };
 
 // 替换图片
@@ -93,8 +110,16 @@ function replaceImage() {
         return
     };
     imageInput.value.click();
-}
+};
 
+// 修改最终数据
+function setFinalData(){
+    // 修改数据
+    mittBus.emit('setItemData', {
+        ...props.componentData,
+        imgSrc: state.src
+    });
+};
 </script>
 
 

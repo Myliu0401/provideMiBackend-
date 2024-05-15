@@ -1,10 +1,10 @@
 <template>
 	<div class="system-role-dialog-container">
 		<el-dialog :title="state.dialog.title" v-model="state.dialog.isShowDialog" width="769px">
-			<el-form ref="roleDialogFormRef" :model="state.ruleForm" size="default" label-width="90px">
+			<el-form ref="roleDialogFormRef" :model="state.ruleForm" size="default" label-width="90px" :rules="rules">
 				<el-row :gutter="35">
 					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
-						<el-form-item label="角色名称">
+						<el-form-item label="角色名称" prop="roleName">
 							<el-input v-model="state.ruleForm.roleName" placeholder="请输入角色名称" clearable></el-input>
 						</el-form-item>
 					</el-col>
@@ -28,6 +28,21 @@
 							<el-switch v-model="state.ruleForm.status" inline-prompt active-text="启" inactive-text="禁"></el-switch>
 						</el-form-item>
 					</el-col>
+					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
+						<el-form-item label="用户名" prop="username">
+							<el-input v-model="state.ruleForm.username" placeholder="请输入账号" maxlength="150"></el-input>
+						</el-form-item>
+					</el-col>
+					<el-col :xs="24" :sm="12" :md="12" :lg="12" :xl="12" class="mb20">
+						<el-form-item label="密码" prop="password">
+							<el-input v-model="state.ruleForm.password" placeholder="请输入密码" maxlength="150"></el-input>
+						</el-form-item>
+					</el-col>
+					<el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="mb20">
+						<el-form-item label="邮箱" prop="email">
+							<el-input v-model="state.ruleForm.email" placeholder="请输入账号" maxlength="150"></el-input>
+						</el-form-item>
+					</el-col>
 					<el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24" class="mb20">
 						<el-form-item label="角色描述">
 							<el-input v-model="state.ruleForm.describe" type="textarea" placeholder="请输入角色描述" maxlength="150"></el-input>
@@ -43,7 +58,7 @@
 			<template #footer>
 				<span class="dialog-footer">
 					<el-button @click="onCancel" size="default">取 消</el-button>
-					<el-button type="primary" @click="onSubmit" size="default">{{ state.dialog.submitTxt }}</el-button>
+					<el-button type="primary" @click="onSubmit('add')" size="default" :loading="state.loading">{{ state.dialog.submitTxt }}</el-button>
 				</span>
 			</template>
 		</el-dialog>
@@ -52,6 +67,9 @@
 
 <script setup lang="ts" name="systemRoleDialog">
 import { reactive, ref } from 'vue';
+import { addUser } from '/@/api/singlePage/index.js';
+import { ElMessageBox, ElMessage } from 'element-plus';
+
 
 // 定义子组件向父组件传值/事件
 const emit = defineEmits(['refresh']);
@@ -65,6 +83,9 @@ const state = reactive({
 		sort: 0, // 排序
 		status: true, // 角色状态
 		describe: '', // 角色描述
+		username: '', // 账号
+		password: '', // 密码
+		email: '', // 邮箱
 	},
 	menuData: [] as TreeType[],
 	menuProps: {
@@ -77,7 +98,17 @@ const state = reactive({
 		title: '',
 		submitTxt: '',
 	},
+	loading: false
 });
+
+const rules = reactive({
+	roleName: [{ required: true, message: '角色名称不能为空', trigger: 'blur' }],
+	username: [{ required: true, message: '账号不能为空', trigger: 'blur' }],
+	password: [{ required: true, message: '密码不能为空', trigger: 'blur' }],
+	email: [{ required: true, message: '邮箱不能为空', trigger: 'blur' }]
+});
+
+
 
 // 打开弹窗
 const openDialog = (type: string, row: RowRoleType) => {
@@ -105,10 +136,24 @@ const onCancel = () => {
 	closeDialog();
 };
 // 提交
-const onSubmit = () => {
+const onSubmit = async (type) => {
+
+	await roleDialogFormRef.value.validate();
+
+	// 判断是否是添加
+	if(type === 'add'){
+		state.loading = true;
+		await addUser({
+			name: state.ruleForm.roleName,
+			username: state.ruleForm.username,
+			password: state.ruleForm.password,
+			email: state.ruleForm.email
+		});
+		state.loading = false;
+		ElMessage.success('添加成功');
+	}
 	closeDialog();
 	emit('refresh');
-	// if (state.dialog.type === 'add') { }
 };
 // 获取菜单结构数据
 const getMenuData = () => {

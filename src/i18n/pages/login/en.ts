@@ -13,6 +13,8 @@ export default {
 		accountPlaceholder2: 'Password: 123456',
 		accountPlaceholder3: 'Please enter the verification code',
 		accountBtnText: 'Sign in',
+		accountPlaceholder4: 'Please enter your account number',
+		accountPlaceholder5: 'Please enter the password'
 	},
 	mobile: {
 		placeholder1: 'Please input mobile phone number',

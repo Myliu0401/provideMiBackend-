@@ -14,6 +14,7 @@ import BasisTextComponent from '../components/basisTextComponent/setDataComp.vue
 import ConvJumpLinkComponent from '../components/convJumpLinkComponent/setDataComp.vue';
 import BasisBusinessCardComponent from '../components/basisBusinessCardComponent/setDataComp.vue';
 import MarketingFormComponent from '../components/marketingFormComponent/setDataComp.vue';
+import MarketingSideFloatingComponent from '../components/marketingSideFloatingComponent/setDataComp.vue';
 
 
 export default {
@@ -26,7 +27,8 @@ export default {
         TopCarouselComponent, 
         ConvJumpLinkComponent,
         BasisBusinessCardComponent,
-        MarketingFormComponent
+        MarketingFormComponent,
+        MarketingSideFloatingComponent
     },
 
     props: {

@@ -13,6 +13,8 @@ export default {
 		accountPlaceholder2: '密码：123456',
 		accountPlaceholder3: '请输入验证码',
 		accountBtnText: '登 录',
+		accountPlaceholder4: '请输入账号',
+		accountPlaceholder5: '请输入密码'
 	},
 	mobile: {
 		placeholder1: '请输入手机号',

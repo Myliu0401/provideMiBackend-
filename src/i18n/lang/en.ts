@@ -8,6 +8,7 @@ export default {
 		templateList: 'templateList',
 		visualizationOperation: 'visualizationOperation',
 		templateCreationPage: 'templateCreationPage',
+		templateSetPage: 'templateSetPage',
 		system: 'system',
 		systemMenu: 'systemMenu',
 		systemRole: 'systemRole',

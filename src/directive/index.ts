@@ -1,6 +1,7 @@
 import type { App } from 'vue';
 import { authDirective } from '/@/directive/authDirective';
 import { wavesDirective, dragDirective } from '/@/directive/customDirective';
+import { permissionInstruction } from '/@/directive/permissionInstruction.js';
 
 /**
  * 导出指令方法：v-xxx
@@ -15,4 +16,7 @@ export function directive(app: App) {
 	wavesDirective(app);
 	// 自定义拖动指令
 	dragDirective(app);
+
+	// 判断权限指令
+	permissionInstruction(app);
 }

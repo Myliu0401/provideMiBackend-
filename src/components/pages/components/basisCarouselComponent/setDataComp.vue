@@ -42,6 +42,7 @@
 <script setup name="basisCarouselComponent">
 import { reactive, onMounted, onUnmounted, ref, defineProps } from 'vue';
 import CardDragArea from '../../publicComponents/CardDragArea.vue';
+//import CardDragArea from './components/CardDragArea.vue';
 
 const props = defineProps({
     componentData: {

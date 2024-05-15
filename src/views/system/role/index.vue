@@ -81,7 +81,7 @@ const state = reactive<SysRoleState>({
 const getTableData = () => {
 	state.tableData.loading = true;
 	const data = [];
-	for (let i = 0; i < 20; i++) {
+	for (let i = 0; i < 1; i++) {
 		data.push({
 			roleName: i === 0 ? '超级管理员' : '普通用户',
 			roleSign: i === 0 ? 'admin' : 'common',

@@ -17,11 +17,10 @@
 
 
         <div class="projectList_main">
-            <el-table v-loading="listData.loading" :data="listData.lists" border max-height="70%" style="width: 100%;">
+            <el-table v-loading="listData.loading" :data="listData.lists" border max-height="70vh" style="width: 100%;">
                 <el-table-column prop="id" label="id" align="center" width="100" />
-                <el-table-column prop="created_at" label="创建日期" align="center" />
                 <el-table-column prop="name" label="项目名称" align="center" />
-                <el-table-column prop="alias" label="别名" align="center" />
+                <el-table-column prop="remark" label="备注" align="center" />
                 <el-table-column prop="display_mode_txt" label="显示方式" align="center" />
                 <el-table-column prop="status" label="状态" align="center" width="100">
                     <template #default="scope">
@@ -36,6 +35,7 @@
                             style="cursor: pointer;font-size: 13px;color: #43a3db">{{ scope.row.project_url }}</span>
                     </template>
                 </el-table-column>
+                <el-table-column prop="created_at" label="创建日期" align="center" />
                 <el-table-column prop="address" label="操作" width="100px;" align="center">
                     <template #default="scope">
                         <el-text class="mx-1" type="primary" size="small" style="cursor: pointer; margin-right: 5px;"

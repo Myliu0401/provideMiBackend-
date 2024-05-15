@@ -9,6 +9,12 @@
             <el-form-item label="别名" prop="alias">
                 <el-input v-model="ruleForm.alias" placeholder="用于URL显示" />
             </el-form-item>
+            <el-form-item label="状态" >
+                <el-switch v-model="ruleForm.status" size="small" active-text="启用" inactive-text="禁用" />
+            </el-form-item>
+            <el-form-item label="备注" >
+                <el-input v-model="ruleForm.remark" placeholder="备注" />
+            </el-form-item>
             <el-form-item label="显示方式" prop="display_mode">
                 <el-radio-group v-model="ruleForm.display_mode">
                     <el-radio value="1">固定显示</el-radio>
@@ -114,7 +120,8 @@ export default {
             display_mode: '1', // 显示方式
             url: '',
             template_id: '',
-
+            status: false, // 状态
+            remark: '', // 备注
             rules: [{
                 country: '', // 地区代码
                 type: 'template', // 规则类型
@@ -223,6 +230,8 @@ export default {
                 name: ruleForm.name,
                 alias: ruleForm.alias,
                 display_mode: display_mode[ruleForm.display_mode],
+                status: ruleForm.status ? 1 : 2,
+                remark: ruleForm.remark,
                 template_id: ruleForm.display_mode == 1 ? state.flexTemplateItem.id : undefined,
                 url: ruleForm.display_mode == 2 ? ruleForm.url : undefined,
                 rules: ruleForm.display_mode !== 3 ? undefined : ruleForm.rules.map((item) => {

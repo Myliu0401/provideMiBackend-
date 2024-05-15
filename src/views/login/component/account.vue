@@ -1,42 +1,32 @@
 <template>
-	<el-form size="large" class="login-content-form">
-		<el-form-item class="login-animation1">
-			<el-input text :placeholder="$t('message.account.accountPlaceholder1')" v-model="state.ruleForm.userName" clearable autocomplete="off">
+	<el-form size="large" class="login-content-form" ref="ruleFormRef" :model="state.ruleForm" :rules="rules">
+		<el-form-item class="login-animation1" prop="userName">
+			<el-input text :placeholder="$t('message.account.accountPlaceholder4')" v-model="state.ruleForm.userName"
+				clearable autocomplete="off">
 				<template #prefix>
 					<el-icon class="el-input__icon"><ele-User /></el-icon>
 				</template>
 			</el-input>
 		</el-form-item>
-		<el-form-item class="login-animation2">
-			<el-input
-				:type="state.isShowPassword ? 'text' : 'password'"
-				:placeholder="$t('message.account.accountPlaceholder2')"
-				v-model="state.ruleForm.password"
-				autocomplete="off"
-			>
+		<el-form-item class="login-animation2" prop="password">
+			<el-input :type="state.isShowPassword ? 'text' : 'password'"
+				:placeholder="$t('message.account.accountPlaceholder5')" v-model="state.ruleForm.password"
+				autocomplete="off">
 				<template #prefix>
 					<el-icon class="el-input__icon"><ele-Unlock /></el-icon>
 				</template>
 				<template #suffix>
-					<i
-						class="iconfont el-input__icon login-content-password"
+					<i class="iconfont el-input__icon login-content-password"
 						:class="state.isShowPassword ? 'icon-yincangmima' : 'icon-xianshimima'"
-						@click="state.isShowPassword = !state.isShowPassword"
-					>
+						@click="state.isShowPassword = !state.isShowPassword">
 					</i>
 				</template>
 			</el-input>
 		</el-form-item>
-		<el-form-item class="login-animation3">
+		<el-form-item class="login-animation3" v-if="false">
 			<el-col :span="15">
-				<el-input
-					text
-					maxlength="4"
-					:placeholder="$t('message.account.accountPlaceholder3')"
-					v-model="state.ruleForm.code"
-					clearable
-					autocomplete="off"
-				>
+				<el-input text maxlength="4" :placeholder="$t('message.account.accountPlaceholder3')"
+					v-model="state.ruleForm.code" clearable autocomplete="off">
 					<template #prefix>
 						<el-icon class="el-input__icon"><ele-Position /></el-icon>
 					</template>
@@ -48,7 +38,8 @@
 			</el-col>
 		</el-form-item>
 		<el-form-item class="login-animation4">
-			<el-button type="primary" class="login-content-submit" round v-waves @click="onSignIn" :loading="state.loading.signIn">
+			<el-button type="primary" class="login-content-submit" round v-waves @click="myLogin"
+				:loading="state.loading.signIn">
 				<span>{{ $t('message.account.accountBtnText') }}</span>
 			</el-button>
 		</el-form-item>
@@ -56,7 +47,7 @@
 </template>
 
 <script setup lang="ts" name="loginAccount">
-import { reactive, computed } from 'vue';
+import { reactive, computed, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import { useI18n } from 'vue-i18n';
@@ -68,6 +59,7 @@ import { initBackEndControlRoutes } from '/@/router/backEnd';
 import { Session } from '/@/utils/storage';
 import { formatAxis } from '/@/utils/formatTime';
 import { NextLoading } from '/@/utils/loading';
+import { login } from '/@/api/singlePage/index.js';
 
 // 定义变量内容
 const { t } = useI18n();
@@ -78,19 +70,28 @@ const router = useRouter();
 const state = reactive({
 	isShowPassword: false,
 	ruleForm: {
-		userName: 'admin',
-		password: '123456',
-		code: '1234',
+		userName: '',
+		password: '',
+		code: '',
 	},
 	loading: {
 		signIn: false,
 	},
 });
 
+const ruleFormRef = ref(null);
+const rules = reactive({
+	userName: [
+		{ required: true, message: '必须输入账号', trigger: 'blur' }
+	],
+	password: [{ required: true, message: '必须输入密码', trigger: 'blur' }]
+});
+
 // 时间获取
 const currentTime = computed(() => {
 	return formatAxis(new Date());
 });
+
 // 登录
 const onSignIn = async () => {
 	state.loading.signIn = true;
@@ -110,6 +111,54 @@ const onSignIn = async () => {
 		signInSuccess(isNoPower);
 	}
 };
+
+// 登录
+async function myLogin() {
+	if (validate()) {
+		return
+	};
+	await ruleFormRef.value.validate();
+	state.loading.signIn = true;
+	let res = null;
+	try {
+		res = await login({
+			username: state.ruleForm.userName,
+			password: state.ruleForm.password
+		});
+	} catch (err) {
+		state.loading.signIn = false;
+		return
+	}
+
+	state.loading.signIn = false;
+	Session.set('token', res.data.token);
+	Cookies.set('userName', state.ruleForm.userName);
+	if (!themeConfig.value.isRequestRoutes) {
+		// 前端控制路由，2、请注意执行顺序
+		const isNoPower = await initFrontEndControlRoutes();
+		signInSuccess(isNoPower);
+	} else {
+		// 模拟后端控制路由，isRequestRoutes 为 true，则开启后端控制路由
+		// 添加完动态路由，再进行 router 跳转，否则可能报错 No match found for location with path "/"
+		const isNoPower = await initBackEndControlRoutes();
+		// 执行完 initBackEndControlRoutes，再执行 signInSuccess
+		signInSuccess(isNoPower);
+	}
+};
+
+
+// 验证
+function validate() {
+	let tips = null;
+	if (state.loading.signIn) {
+		tips = '正在提交中，不能重复';
+	};
+
+	tips && ElMessage.warning(tips);
+
+	return !!tips;
+}
+
 // 登录成功后的跳转
 const signInSuccess = (isNoPower: boolean | undefined) => {
 	if (isNoPower) {
@@ -141,6 +190,7 @@ const signInSuccess = (isNoPower: boolean | undefined) => {
 <style scoped lang="scss">
 .login-content-form {
 	margin-top: 20px;
+
 	@for $i from 1 through 4 {
 		.login-animation#{$i} {
 			opacity: 0;
@@ -150,20 +200,24 @@ const signInSuccess = (isNoPower: boolean | undefined) => {
 			animation-delay: calc($i/10) + s;
 		}
 	}
+
 	.login-content-password {
 		display: inline-block;
 		width: 20px;
 		cursor: pointer;
+
 		&:hover {
 			color: #909399;
 		}
 	}
+
 	.login-content-code {
 		width: 100%;
 		padding: 0;
 		font-weight: bold;
 		letter-spacing: 5px;
 	}
+
 	.login-content-submit {
 		width: 100%;
 		letter-spacing: 2px;

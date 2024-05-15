@@ -8,11 +8,11 @@
                 <el-button type="primary" :icon="Search" size="default" @click="search">搜索</el-button>
             </div>
 
-            <el-button :icon="Plus" size="default" @click="enterTemplateCreation">创建模板</el-button>
+            <el-button :icon="Plus" size="default" @click="enterTemplateCreation" v-authority>创建模板</el-button>
         </div>
 
         <div class="templateList_content">
-            <el-table v-loading="listData.loading" :data="listData.lists" border max-height="70%" style="width: 100%;"
+            <el-table v-loading="listData.loading" :data="listData.lists" border max-height="70vh" style="width: 100%;"
                 stripe>
                 <el-table-column prop="id" label="id" align="center" width="80" />
                 <el-table-column prop="type" label="类型" align="center" />
@@ -73,13 +73,15 @@ function wakeUpPreview(item) {
 // 进入创建模板
 function enterTemplateCreation() {
     sessionStorage.removeItem('templateData');
+    sessionStorage.removeItem('templateBasisInfo');
     router.push('/templateCreationPage');
 };
 
 // 进入修改模板
 function enterSetTemplate(item){
     sessionStorage.setItem('templateData', JSON.stringify(item.params));
-    router.push('/templateCreationPage');
+    sessionStorage.setItem('templateBasisInfo', JSON.stringify(item));
+    router.push('/templateSetPage');
 };
 </script>
 

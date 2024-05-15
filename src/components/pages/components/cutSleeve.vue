@@ -1,5 +1,9 @@
 <template>
-    <div class="cutSleeve" :class="{ active: id === activeId, disabled: disabled }" @click.stop="switchSelection">
+    <div class="cutSleeve" :class="{ 
+        active: id === activeId, 
+        disabled: disabled, 
+        sideFixing: componentName === 'marketingSideFloatingComponent' 
+    }" @click.stop="switchSelection">
         <slot></slot>
         <DeleteBox :id="id" />
     </div>
@@ -30,6 +34,12 @@ export default {
         // 是否进行操作
         disabled: {
             default: false
+        },
+
+
+        // 组件名
+        componentName: {
+            default: ''
         }
     },
 
@@ -66,6 +76,19 @@ export default {
     &.active {
         box-shadow: 0 0 0 2px #07c160;
         z-index: 1;
+    }
+
+
+    &.sideFixing{
+         position: absolute;
+         right: 0px;
+         bottom: 100px;
+         z-index: 111;
+
+
+         &:hover{
+            z-index: 111;
+         }
     }
 }
 </style>
